@@ -7,6 +7,8 @@ const minLng = -6.65, maxLng = -6.00;
 const minScale = 0.5, maxScale = 20;
 const minRadius = 1, maxRadius = 8; 
 const minStroke = 0.25, maxStroke = 2; 
+const minFont = 1, maxFont = 12; 
+const minFontDist = 2, maxFontDist = 18; 
 
 // ------------------------------------------------------------
 // ----------------------- Constructor ------------------------
@@ -14,11 +16,14 @@ const minStroke = 0.25, maxStroke = 2;
 var NetworkGraph = function(svg, nodes, edges){
     this.nodes = nodes || [];
     this.edges = edges || [];
-    this.latLimits =   { min: minLat,    max: maxLat    }
-    this.lngLimits =   { min: minLng,    max: maxLng    }
-    this.radiiLimits = { min: minRadius, max: maxRadius }
-    this.scaleLimits = { min: minScale,  max: maxScale  }
-    this.stokeLimits = { min: minStroke, max: maxStroke }
+    this.latLimits      = { min: minLat,      max: maxLat      }
+    this.lngLimits      = { min: minLng,      max: maxLng      }
+    this.fontLimits     = { min: minFont,     max: maxFont     }
+    this.scaleLimits    = { min: minScale,    max: maxScale    }
+    this.stokeLimits    = { min: minStroke,   max: maxStroke   }
+    this.radiiLimits    = { min: minRadius,   max: maxRadius   }
+    this.fontDistLimits = { min: minFontDist, max: maxFontDist }
+
     this.scale = 1
     this.state = {
         selectedNode: null,
@@ -75,6 +80,14 @@ var NetworkGraph = function(svg, nodes, edges){
     this.strokeScale = d3.scaleLog()
         .domain([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])
         .range([thisGraph.stokeLimits.max, thisGraph.stokeLimits.min]);
+
+    this.fontScale = d3.scaleLog()
+        .domain([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])
+        .range([thisGraph.fontLimits.max, thisGraph.fontLimits.min]);
+
+    this.fontDistScale = d3.scaleLog()
+        .domain([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])
+        .range([thisGraph.fontDistLimits.max, thisGraph.fontDistLimits.min]);
     
     // Register zoom behaviour callbacks ---------------------
     this.svg.call(d3.zoom()
@@ -113,7 +126,7 @@ NetworkGraph.prototype.consts =  {
     BACKSPACE_KEY: 8,
     DELETE_KEY: 46,
     ENTER_KEY: 13
-  };
+};
 
 
 // ------------------------------------------------------------
@@ -126,6 +139,7 @@ NetworkGraph.prototype.zoomed = function(){
     this.scale = d3.event.transform.k
     d3.select("." + this.consts.graphClass).attr("transform", d3.event.transform); 
     this.updateRadii.call(this);
+    this.updateFonts.call(this);
 };
  
 NetworkGraph.prototype.updateWindow = function(svg){
@@ -138,18 +152,15 @@ NetworkGraph.prototype.updateWindow = function(svg){
 };
 
 NetworkGraph.prototype.insertNodeID = function (gEl, title) {
-    var words = title.split(/\s+/g),
-        nwords = words.length;
+    var thisGraph = this;
     var el = gEl.append("text")
           .attr("text-anchor","middle")
-          .attr("dy", "-" + (nwords-1)*7.5);
-
-    for (var i = 0; i < words.length; i++) {
-      var tspan = el.append('tspan').text(words[i]);
-      if (i > 0)
-        tspan.attr('x', 0).attr('dy', '15');
-    }
-  };
+          .attr("font-size", thisGraph.fontScale(thisGraph.scale))
+          .attr("dy", "-7.5");
+    var tspan = el.append('tspan').text(title);
+    tspan.attr('x', 0)
+        .attr('dy', thisGraph.fontDistScale(thisGraph.scale));
+};
 
 
 // Mouse Activity --------------------------------------------
@@ -239,6 +250,14 @@ NetworkGraph.prototype.updateRadii = function(){
     d3.selectAll("circle")
         .attr("r", String(thisGraph.zoomScale(thisGraph.scale)))
         .attr("stroke-width", thisGraph.strokeScale(thisGraph.scale) + "px");
+};
+
+NetworkGraph.prototype.updateFonts = function(){
+    var thisGraph = this;
+    thisGraph.svgG.selectAll("text")
+        .attr("font-size", thisGraph.fontScale(thisGraph.scale));
+    thisGraph.svgG.selectAll("tspan")
+        .attr('dy', thisGraph.fontDistScale(thisGraph.scale));
 };
 
   
