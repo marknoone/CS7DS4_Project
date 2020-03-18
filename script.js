@@ -1,15 +1,7 @@
-// Global Vars
-// const minLat, maxLat;
-// const minLng, maxLng;
-
 // Build up data structures 
 //d3.csv("assets/gtfs/luas/stops.csv").then(function(data){
     //data[]
 //});
-
-function drawDebug() {
-
-}
 
 // Define render-loop
 function render() {
@@ -32,11 +24,12 @@ body = document.getElementsByTagName('body')[0];
 var width = window.innerWidth || document.clientWidth || body.clientWidth,
 height =  window.innerHeight|| document.clientHeight|| body.clientHeight;
 
-var xLoc = width/2 - 25,
-      yLoc = 100;
+var nodes = [
+    {title: "St.Stephen's Green", id: "822GA00058", lat: "53.339128708973", lng: "-6.26111748798404"},
+    {title: "Harcourt", id: "822GA00062", lat: "53.3336509121028", lng: "-6.26269173695206"},
+    {title: "Charlemont", id: "822GA00070", lat: "53.3306152452483", lng: "-6.25853598870766"},
+];
 
-var nodes = [{title: "new concept", id: 0, x: xLoc, y: yLoc},
-               {title: "new concept", id: 1, x: xLoc, y: yLoc + 200}];
 var edges = [{source: nodes[1], target: nodes[0]}];
 
 var svg = d3.select('#animation')
