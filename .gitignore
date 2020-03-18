@@ -1,0 +1,6 @@
+# Ignore GTFS src files
+# Availible at: https://www.transportforireland.ie/transitData/PT_Data.html
+gen/
+assets/gtfs
+
+*.exe
