@@ -1,0 +1,169 @@
+hr {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+p {
+    display: inline-block;
+    font-family: 'Roboto Slab', serif;
+    color: #333
+}
+
+ul {
+    list-style: none;
+    text-decoration: none;
+    display: inline-block;
+    margin:0;
+}
+
+li {
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.ui-controls {
+    position: absolute;
+    right: 30px;
+
+    text-align: center;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    height: 40px;
+    width: 40px;
+    color: #333;
+    box-shadow: 0px 2px 10px 2px #aaa;
+}
+
+.filter { top: 6vh; padding-top: 6px; }
+.info { top: 90vh; padding-top: 6px; }
+.zoom { top: 82vh; height: 80px;}
+#zoom-plus { border-radius: 6px 6px 0px 0px }
+#zoom-minus { border-radius: 0px 0px 6px 6px }
+.zoom ul { padding: 0; }
+.zoom ul li {
+    display: block;
+    border: 1px solid #ccc;
+    height: 40px;
+    width: 40px;
+    padding-top: 6px;
+}
+.info:hover { color: #2980b9 }
+.filter:hover { color: #2980b9 }
+.zoom ul li:hover { color: #2980b9 }
+
+.info:active { background-color: #ddd }
+.filter:active { background-color: #ddd }
+.zoom ul li:active { background-color: #ddd }
+
+.title-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: white;
+    box-shadow: 0px 2px 10px 2px #aaa;
+    width: 100vw;
+    height: 56px;
+}
+
+.time-sim {
+    font-size: 24px;
+    font-weight: 500;
+    margin-right: 24px;
+}
+
+.time-ctrl {
+    padding: 8px 0px 0px 20px;
+    text-align: left;
+}
+
+.time-ctrl-btns {
+    text-align: center;
+}
+
+.time-ctrl-btns ul li {
+    margin: 0;
+    padding: 15px 20px 15px 20px;
+    border: 1px solid #ccc;
+    float:left;
+    cursor: pointer;
+}
+
+.time-ctrl-btns ul li:hover {
+    background-color: #eee;
+}
+
+.time-ctrl-btns ul li:active {
+    background-color: #ccc;
+    box-shadow: inset 0px 2px 10px #aaa;
+}
+
+.time-ctrl li:hover {
+    cursor: pointer;
+}
+
+.sh-metrics {
+    padding: 15px 20px 0px 0px;
+    text-align: right;
+    height: 56px;
+    overflow: hidden;
+}
+
+.vehicle-metrics {
+    display: inline-block;
+}
+
+.vehicle-metrics span {
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.show-hide-popup {
+    display: inline-block;
+    margin-left: 30px;
+}
+
+#show-hide-btn {
+    cursor: pointer;
+}
+
+.title {
+    padding-top: 14px;
+    padding-left: 16px;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.author {
+    padding-top: 16px;
+    padding-right: 16px;
+    font-size: 12px; 
+    text-align: right;
+}
+
+.emp-title{
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.popup-layout {
+    position: absolute;
+    /* bottom: 0px; -- Taken care of in UI.js */ 
+    left: 0px;
+    text-align: center;
+    height: 360px;
+    width: 100vw;
+    transition:bottom 0.2s linear;
+}
+
+.popup {
+    height: 100%;
+    width: 100%;
+    padding-bottom: 24px;
+    margin: auto;
+    background: white;
+    box-shadow: 0px 2px 10px 2px #aaa;
+}

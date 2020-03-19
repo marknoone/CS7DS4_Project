@@ -4,12 +4,125 @@
 		<meta charset="utf-8">
 		<title>Assignment A3: Dublin's Transit Network</title>
 		<link rel="stylesheet" type="text/css" href="assets/style.css">
+		<link rel="stylesheet" type="text/css" href="assets/ui.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet"> 
+
 		<script type="text/javascript" src="assets/d3.min.js"></script>
+		<script src="https://kit.fontawesome.com/4f4bdd9b87.js" crossorigin="anonymous"></script>
 	</head>
 	<body>
 		<div id="animation"></div>
+
+		<div class="title-bar">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-lg-4">
+						<p class="title"> <span class="emp-title">Assignment A3:</span> A Visualization of Dublin's Transit Network</p>
+					</div>
+					<div class="col-lg-4 offset-lg-4">
+						<p class="title author">By Mark Noone</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="filter ui-controls"><i class="fas fa-layer-group"></i></div>
+		<div class="zoom ui-controls">
+			<ul>
+				<li id="zoom-plus"><i class="fas fa-plus"></i></li>
+				<li id="zoom-minus"><i class="fas fa-minus"></i></li>
+			</ul>
+		</div>
+		<div class="info ui-controls"><i class="fas fa-info"></i></div>
+
+		<div class="popup-layout">
+			<div class="popup">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-lg-3">
+							<div class="time-ctrl">
+								<p class="time-sim">17:00:00</p>
+								<p class="time-local"> Local time: 17:00:00 (GMT)</p>
+								<p class="time-local"> Spped: (<span id="sim-speed">1</span>x)</p>
+							</div>
+						</div>
+						<div class="col-lg-2 offset-lg-2">
+							<div class="time-ctrl-btns">
+								<ul>
+									<li><i class="fas fa-lg fa-backward"></i></li>
+									<li id="play-pause-btn"><i class="fas fa-lg fa-play"></i></li>
+									<li><i class="fas fa-lg fa-forward"></i></li>
+								</ul>
+							</div>
+						</div>
+						<div class="col-lg-4 offset-lg-1">
+							<div class="sh-metrics">
+								<div class="vehicle-metrics">
+									<ul><li class="vehicle-metric">
+											<p><i class="fas fa-bus"></i>
+												Active Buses: <span id="bus-metric">0</span></p>
+										</li>
+										<li class="vehicle-metric">
+											<p><i class="fas fa-train"></i>
+												Active Trains: <span id="train-metric">0</span></p>
+										</li>
+										<li class="vehicle-metric">
+											<p><i class="fas fa-tram"></i>
+												Active Trams: <span id="tram-metric">0</span></p>
+									</li></ul>
+								</div>
+								<div class="show-hide-popup">
+									<p id="show-hide-btn"><i class="fas fa-angle-up"></i></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr />
+				<div class="container-fluid">
+					<div class="row justify-content-center">
+						<div class="col-lg-2 popup-chart" id="vehicleActivity1"></div>
+						<div class="col-lg-2 popup-chart" id="vehicleActivity2"></div>
+						<div class="col-lg-2 popup-chart" id="vehicleActivity3"></div>
+						<div class="col-lg-2 popup-chart" id="vehicleActivity4"></div>
+						<div class="col-lg-2 popup-chart" id="vehicleActivity5"></div>
+					</div>
+					<div class="row justify-content-center">
+						<div class="col-lg-2 popup-chart" id="heatChart1"></div>
+						<div class="col-lg-2 popup-chart" id="heatChart2"></div>
+						<div class="col-lg-2 popup-chart" id="heatChart3"></div>
+						<div class="col-lg-2 popup-chart" id="heatChart4"></div>
+						<div class="col-lg-2 popup-chart" id="heatChart5"></div>
+					</div>
+				</div>
+			</div>
+		</div>
 		
+		<script type="text/javascript" src="util.js"></script>
+		<script type="text/javascript" src="popup-charts.js"></script>
 		<script type="text/javascript" src="network-graph.js"></script>
-        <script type="text/javascript" src="script.js"></script>
+		<script type="text/javascript" src="script.js"></script>
+		<script type="text/javascript" src="ui.js"></script>
     </body>
 </html>
+
+<!-- 
+	Used Icons (FontAwesome):
+	<i class="fas fa-backward"></i>    -- Rewind button
+	<i class="fas fa-forward"></i>     -- Fast forward 
+	<i class="fas fa-play"></i>        -- Play button
+	<i class="fas fa-pause"></i>       -- Pause button 
+	<i class="fas fa-layer-group"></i> -- Filter icons
+	<i class="fas fa-plus"></i>        -- Zoom plus
+	<i class="fas fa-minus"></i>       -- Zoom minus
+	<i class="fas fa-info"></i>        -- Information marker
+	<i class="fas fa-angle-up"></i>    -- Popup show
+	<i class="fas fa-angle-down"></i>  -- Popup hide
+
+	<i class="fas fa-tram"></i>        -- Tram icon
+	<i class="fas fa-train"></i>       -- Train icon
+	<i class="fas fa-bus"></i>         -- Bus icon
+
+ -->

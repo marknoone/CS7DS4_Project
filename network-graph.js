@@ -1,28 +1,32 @@
-// The following NEtwork graph is an adapted graph from:
+// The following Network graph is an adapted graph from:
 // https://bl.ocks.org/cjrd/6863459
 
-// Global Vars ------------------------------------------------
+// Global Consts ----------------------------------------------
 const minLat = 53.1000, maxLat = 53.5000;
 const minLng = -6.65, maxLng = -6.00;
 const minScale = 0.5, maxScale = 20;
 const minRadius = 1, maxRadius = 8; 
-const minStroke = 0.25, maxStroke = 2; 
+const minNodeStroke = 0.25, maxNodeStroke = 2; 
+const minLineStroke = 0.5, maxLineStroke = 6; 
 const minFont = 1, maxFont = 12; 
 const minFontDist = 2, maxFontDist = 18; 
+
 
 // ------------------------------------------------------------
 // ----------------------- Constructor ------------------------
 // ------------------------------------------------------------
-var NetworkGraph = function(svg, nodes, edges){
-    this.nodes = nodes || [];
-    this.edges = edges || [];
-    this.latLimits      = { min: minLat,      max: maxLat      }
-    this.lngLimits      = { min: minLng,      max: maxLng      }
-    this.fontLimits     = { min: minFont,     max: maxFont     }
-    this.scaleLimits    = { min: minScale,    max: maxScale    }
-    this.stokeLimits    = { min: minStroke,   max: maxStroke   }
-    this.radiiLimits    = { min: minRadius,   max: maxRadius   }
-    this.fontDistLimits = { min: minFontDist, max: maxFontDist }
+var NetworkGraph = function(svg, nodes, edges, colours){
+    this.nodes   = nodes   || [];
+    this.edges   = edges   || [];
+    this.colours = colours || [];
+    this.latLimits        = { min: minLat,         max: maxLat        }
+    this.lngLimits        = { min: minLng,         max: maxLng        }
+    this.fontLimits       = { min: minFont,        max: maxFont       }
+    this.scaleLimits      = { min: minScale,       max: maxScale      }
+    this.nodeStrokeLimits = { min: minNodeStroke,  max: maxNodeStroke }
+    this.lineStrokeLimits = { min: minLineStroke,  max: maxLineStroke }
+    this.radiiLimits      = { min: minRadius,      max: maxRadius     }
+    this.fontDistLimits   = { min: minFontDist,    max: maxFontDist   }
 
     this.scale = 1
     this.state = {
@@ -33,28 +37,6 @@ var NetworkGraph = function(svg, nodes, edges){
         isZoomBehaviourActive: false,
         lastKeyDown: -1
     };
-
-    var defs = svg.append('svg:defs');
-    defs.append('svg:marker')
-      .attr('id', 'end-arrow')
-      .attr('viewBox', '0 -5 10 10')
-      .attr('refX', "32")
-      .attr('markerWidth', 3.5)
-      .attr('markerHeight', 3.5)
-      .attr('orient', 'auto')
-      .append('svg:path')
-      .attr('d', 'M0,-5L10,0L0,5');
-
-    // define arrow markers for leading arrow
-    defs.append('svg:marker')
-      .attr('id', 'mark-end-arrow')
-      .attr('viewBox', '0 -5 10 10')
-      .attr('refX', 7)
-      .attr('markerWidth', 3.5)
-      .attr('markerHeight', 3.5)
-      .attr('orient', 'auto')
-      .append('svg:path')
-      .attr('d', 'M0,-5L10,0L0,5');
 
     this.svg = svg;
     var svgG = this.svgG = svg.append("g")
@@ -77,9 +59,13 @@ var NetworkGraph = function(svg, nodes, edges){
         .domain([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])
         .range([thisGraph.radiiLimits.max, thisGraph.radiiLimits.min]);
 
-    this.strokeScale = d3.scaleLog()
+    this.nodeStrokeScale = d3.scaleLog()
         .domain([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])
-        .range([thisGraph.stokeLimits.max, thisGraph.stokeLimits.min]);
+        .range([thisGraph.nodeStrokeLimits.max, thisGraph.nodeStrokeLimits.min]);
+
+    this.lineStrokeScale = d3.scaleLog()
+        .domain([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])
+        .range([thisGraph.lineStrokeLimits.max, thisGraph.lineStrokeLimits.min]);
 
     this.fontScale = d3.scaleLog()
         .domain([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])
@@ -104,13 +90,13 @@ var NetworkGraph = function(svg, nodes, edges){
         .on("dblclick.zoom", null);
 
     // Register callbacks for mouse/key events ----------------
-    this.svg.on("mousedown", function(d){this.svgMouseDown.call(this, d);});
-    this.svg.on("mouseup", function(d){this.svgMouseUp.call(this, d);});
+    this.svg.on("mousedown", function(d){ thisGraph.svgMouseDown.call(thisGraph, d);});
+    this.svg.on("mouseup", function(d){ thisGraph.svgMouseUp.call(thisGraph, d);});
     d3.select(window)
-        .on("keydown", function(){ this.svgKeyDown.call(this); })
-        .on("keyup", function(){ this.svgKeyUp.call(this); });
+        .on("keydown", function(){ thisGraph.svgKeyDown.call(thisGraph); })
+        .on("keyup", function(){ thisGraph.svgKeyUp.call(thisGraph); });
 
-    window.onresize = function(){this.updateWindow(this.svg);};    
+    window.onresize = function(){ thisGraph.updateWindow(thisGraph.svg); };    
 };
 
 
@@ -136,15 +122,19 @@ NetworkGraph.prototype.setLatLimits = function(latLimits){ this.latLimits = latL
 NetworkGraph.prototype.setLngLimits = function(lngLimits){ this.lngLimits = lngLimits; };
 NetworkGraph.prototype.zoomed = function(){
     this.state.isZoomBehaviourActive = true;
-    this.scale = d3.event.transform.k
-    d3.select("." + this.consts.graphClass).attr("transform", d3.event.transform); 
-    this.updateRadii.call(this);
-    this.updateFonts.call(this);
+    d3.select("." + this.consts.graphClass).attr("transform", d3.event.transform);
+    
+    // Update scales only on scale change
+    if (this.scale === d3.event.transform.k)
+        return 
+
+    this.scale = d3.event.transform.k 
+    this.updateScales.call(this);
 };
  
 NetworkGraph.prototype.updateWindow = function(svg){
-    var document = document.documentElement,
-            body = document.getElementsByTagName('body')[0];
+    var document = window.document.documentElement,
+            body = window.document.getElementsByTagName('body')[0];
 
     var width  = window.innerWidth || document.clientWidth || body.clientWidth,
         height =  window.innerHeight|| document.clientHeight|| body.clientHeight;
@@ -203,10 +193,19 @@ NetworkGraph.prototype.updateGraph = function(){
     });
 
     // Update paths ---------------------------------
-    this.paths.style('marker-end', 'url(#end-arrow)')
+    this.paths
       .classed(consts.selectedClass, function(d){
         return d === state.selectedEdge;
       })
+      .attr("data-distance", function(d){ return util.dist(
+        thisGraph.xScale(d.source.lng), // x1
+        thisGraph.xScale(d.target.lng), // x2
+        thisGraph.yScale(d.source.lat), // y1
+        thisGraph.yScale(d.target.lat)  // y2
+       )})
+      .attr("stroke", function(d){ 
+        return thisGraph.colours[d.source.operator]? thisGraph.colours[d.source.operator] : "#333"})
+      .attr("stroke-width", thisGraph.lineStrokeScale(thisGraph.scale) + "px")
       .attr("d", function(d){
         return "M" + thisGraph.xScale(d.source.lng) + "," + thisGraph.yScale(d.source.lat) + 
             "L" + thisGraph.xScale(d.target.lng) + "," + thisGraph.yScale(d.target.lat);
@@ -214,18 +213,31 @@ NetworkGraph.prototype.updateGraph = function(){
 
     this.paths.enter()
       .append("path")
-      .style('marker-end','url(#end-arrow)')
       .classed("link", true)
+      .attr("data-distance", function(d){ return util.dist(
+          thisGraph.xScale(d.source.lng), // x1
+          thisGraph.xScale(d.target.lng), // x2
+          thisGraph.yScale(d.source.lat), // y1
+          thisGraph.yScale(d.target.lat)  // y2
+       )})
+      .attr("stroke", function(d){ 
+        return thisGraph.colours[d.source.operator]? thisGraph.colours[d.source.operator] : "#333"})
+      .attr("stroke-width", thisGraph.lineStrokeScale(thisGraph.scale) + "px")
       .attr("d", function(d){
-        return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
+        return "M" + thisGraph.xScale(d.source.lng) + "," + thisGraph.yScale(d.source.lat) + 
+            "L" + thisGraph.xScale(d.target.lng) + "," + thisGraph.yScale(d.target.lat);
       });
 
     this.paths.exit().remove();
     
     // Update nodes ..........................................
     this.circles = this.circles.data(this.nodes, function(d){ return d.id;});
-    this.circles.attr("transform", function(d){
-        return "translate(" + thisGraph.xScale(d.lng) + "," + thisGraph.yScale(d.lat) + ")";});
+    this.circles
+        .attr("transform", function(d){
+            return "translate(" + thisGraph.xScale(d.lng) + "," + thisGraph.yScale(d.lat) + ")";})
+        .attr("stroke", function(d){ 
+            return thisGraph.colours[d.operator]? thisGraph.colours[d.operator] : "#333"});
+
     var newGs= this.circles.enter()
           .append("g");
 
@@ -233,6 +245,8 @@ NetworkGraph.prototype.updateGraph = function(){
        .attr("transform", function(d){
           return "translate(" + thisGraph.xScale(d.lng) + "," + thisGraph.yScale(d.lat) + ")";
        })
+       .attr("stroke", function(d){ 
+          return thisGraph.colours[d.operator]? thisGraph.colours[d.operator] : "#333"})
       .on("mouseover", function(d){ /* Adjust CSS classes */ })
       .on("mouseout", function(d){ /* Adjust CSS classes */})
       .on("mousedown", function(d){ /* De-register selected node */})
@@ -240,24 +254,39 @@ NetworkGraph.prototype.updateGraph = function(){
 
     newGs.append("circle")
         .attr("r", String(thisGraph.zoomScale(thisGraph.scale)))
-        .attr("stroke-width", thisGraph.strokeScale(thisGraph.scale) + "px");
+        .attr("stroke-width", thisGraph.nodeStrokeScale(thisGraph.scale) + "px");
     newGs.each(function(d){ thisGraph.insertNodeID(d3.select(this), d.title); });
     this.circles.exit().remove();
   };
 
-NetworkGraph.prototype.updateRadii = function(){
+NetworkGraph.prototype.updateScales = function(){
     var thisGraph = this;
+
+    // Update Strokes
     d3.selectAll("circle")
         .attr("r", String(thisGraph.zoomScale(thisGraph.scale)))
-        .attr("stroke-width", thisGraph.strokeScale(thisGraph.scale) + "px");
-};
+        .attr("stroke-width", thisGraph.nodeStrokeScale(thisGraph.scale) + "px");
 
-NetworkGraph.prototype.updateFonts = function(){
-    var thisGraph = this;
+    thisGraph.svgG.selectAll("path")
+        .attr("stroke-width", thisGraph.lineStrokeScale(thisGraph.scale) + "px");
+
+    // Update Fonts
     thisGraph.svgG.selectAll("text")
         .attr("font-size", thisGraph.fontScale(thisGraph.scale));
     thisGraph.svgG.selectAll("tspan")
         .attr('dy', thisGraph.fontDistScale(thisGraph.scale));
+
+    this.evaluateCollisions.call(this);
 };
 
-  
+NetworkGraph.prototype.evaluateCollisions = function(){
+    var edges = this.edges;
+    // For all nodes
+    // -- Detect those with tiny distances
+    // -- Remove link between 
+    // -- Create new Uber node,
+    // -- Attach uber node to all links that both already linked too 
+    // ----- Note: make sure to preserve route origin departure times.
+    // -- Remove old edges.
+};
+
