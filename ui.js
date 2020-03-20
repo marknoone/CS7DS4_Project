@@ -15,10 +15,28 @@ const irToggle   = document.querySelector('#ir-toggle');
 const gadToggle  = document.querySelector('#gad-toggle');
 const luasToggle = document.querySelector('#luas-toggle');
 
+// daySelect Buttons
+const dayCharts         = document.querySelector('#chart-container');
+const mondaySelect      = document.querySelector('#monday');
+const tuesdaySelect     = document.querySelector('#tuesday');
+const wednesdaySelect   = document.querySelector('#wednesday');
+const thursdaySelect    = document.querySelector('#thursday');
+const fridaySelect      = document.querySelector('#friday');
+const saturdaySelect    = document.querySelector('#saturday');
+const sundaySelect      = document.querySelector('#sunday');
+
+mondaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "0vw";   });
+tuesdaySelect.addEventListener('click',   function(e) { dayCharts.style.right = "100vw"; });
+wednesdaySelect.addEventListener('click', function(e) { dayCharts.style.right = "200vw"; });
+thursdaySelect.addEventListener('click',  function(e) { dayCharts.style.right = "300vw"; });
+fridaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "400vw"; });
+saturdaySelect.addEventListener('click',  function(e) { dayCharts.style.right = "500vw"; });
+sundaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "600vw"; });
+
 var uiState = {
     isInfoShowing: false,
     isFilterShowing: false,
-    isPopupShowing: false
+    isPopupShowing: true
 }
 
 function toggleActiveBtn(el){
@@ -41,9 +59,9 @@ function updateUI() {
     // Change button icon
     if (uiState.isPopupShowing) {
         shBtn.childNodes[0].className = "fas fa-angle-down";
-        infoLayout.style.top = "67vh";
-        infoBtn.style.top = "67vh";
-        zoomLayout.style.top = "59vh";
+        infoLayout.style.top = "58vh";
+        infoBtn.style.top = "58vh";
+        zoomLayout.style.top = "50vh";
     }
     else {
         shBtn.childNodes[0].className = "fas fa-angle-up";
@@ -56,7 +74,7 @@ function updateUI() {
     if (uiState.isPopupShowing) 
         popup.style.bottom = "0px";
     else
-        popup.style.bottom = "-304px";
+        popup.style.bottom = "-424px";
 
     if(uiState.isFilterShowing){
         filterLayout.style.opacity = 1

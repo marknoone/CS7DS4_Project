@@ -132,25 +132,88 @@
 				</div>
 				<hr />
 				<div class="container-fluid">
-					<div class="row justify-content-center">
-						<div class="col-lg-2 popup-chart" id="vehicleActivity1"></div>
-						<div class="col-lg-2 popup-chart" id="vehicleActivity2"></div>
-						<div class="col-lg-2 popup-chart" id="vehicleActivity3"></div>
-						<div class="col-lg-2 popup-chart" id="vehicleActivity4"></div>
-						<div class="col-lg-2 popup-chart" id="vehicleActivity5"></div>
-					</div>
-					<div class="row justify-content-center">
-						<div class="col-lg-2 popup-chart" id="heatChart1"></div>
-						<div class="col-lg-2 popup-chart" id="heatChart2"></div>
-						<div class="col-lg-2 popup-chart" id="heatChart3"></div>
-						<div class="col-lg-2 popup-chart" id="heatChart4"></div>
-						<div class="col-lg-2 popup-chart" id="heatChart5"></div>
+					<div class="row dayViewSelector">
+						<div class="col-lg-3 ta-left">
+							<p>Active Stop: <span style="font-size: 16px; font-weight: 400; padding-left: 10px;">
+								Snoughborough Road (3808)</span></p>
+						</div>
+						<div class="col-lg-6">
+							<p>Day Selected:</p>
+							<ul>
+								<li class="daySelect" id="monday"><p>Monday</p></li>
+								<li class="daySelect" id="tuesday"><p>Tuesday</p></li>
+								<li class="daySelect" id="wednesday"><p>Wednesday</p></li>
+								<li class="daySelect" id="thursday"><p>Thursday</p></li>
+								<li class="daySelect" id="friday"><p>Friday</p></li>
+								<li class="daySelect" id="saturday"><p>Saturday</p></li>
+								<li class="daySelect" id="sunday"><p>Sunday</p></li>
+							</ul>
+						</div>
 					</div>
 				</div>
+				<ul class="dayViews ta-left" id="chart-container">
+					<li class="dayView">
+						<div class="container-fluid">
+							<div class="row justify-center" style="width: 100%">
+								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart1"></div><p>Average Wait Times</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity1"></div><p>Vehicles Using Stop</p></div></div>
+							</div>
+						</div>
+					</li>
+					<li class="dayView">
+						<div class="container-fluid">
+							<div class="row justify-center" style="width: 100%">
+								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart2"></div><p>Average Wait Times</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity2"></div><p>Vehicles Using Stop</p></div></div>
+							</div>
+						</div>
+					</li>
+					<li class="dayView">
+						<div class="container-fluid">
+							<div class="row justify-center" style="width: 100%">
+								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart3"></div><p>Average Wait Times</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity3"></div><p>Vehicles Using Stop</p></div></div>
+							</div>
+						</div>
+					</li>
+					<li class="dayView">
+						<div class="container-fluid">
+							<div class="row justify-center" style="width: 100%">
+								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart4"></div><p>Average Wait Times</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity4"></div><p>Vehicles Using Stop</p></div></div>
+							</div>
+						</div>
+					</li>
+					<li class="dayView">
+						<div class="container-fluid">
+							<div class="row justify-center" style="width: 100%">
+								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart5"></div><p>Average Wait Times</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity5"></div><p>Vehicles Using Stop</p></div></div>
+							</div>
+						</div>
+					</li>
+					<li class="dayView">
+						<div class="container-fluid">
+							<div class="row justify-center" style="width: 100%">
+								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart6"></div><p>Average Wait Times</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity6"></div><p>Vehicles Using Stop</p></div></div>
+							</div>
+						</div>
+					</li>
+					<li class="dayView">
+						<div class="container-fluid">
+							<div class="row justify-center" style="width: 100%">
+								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart7"></div><p>Average Wait Times</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity7"></div><p>Vehicles Using Stop</p></div></div>
+							</div>
+						</div>
+					</li>
+				</ul>
 			</div>
 		</div>
 		
 		<script type="text/javascript" src="util.js"></script>
+		<script type="text/javascript" src="state.js"></script>
 		<script type="text/javascript" src="popup-charts.js"></script>
 		<script type="text/javascript" src="network-graph.js"></script>
 		<script type="text/javascript" src="script.js"></script>
