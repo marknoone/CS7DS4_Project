@@ -69,6 +69,16 @@ async function main(w, h){
             lng: stop.stop_lon, 
             operator: "LUAS",
         })
+
+    })
+    var loc;
+    nodes.forEach(function(d) {
+        loc = [d.lat, d.lng];
+        try{
+            d.LatLng = new L.LatLng(loc[0], loc[1]);
+        } catch(err) {
+            console.log('error', d.LatLng, err)
+        }
     })
 
     // Each edge must have their trip encoded for simulation
@@ -78,16 +88,32 @@ async function main(w, h){
         {source: nodes[2], target: nodes[3]}
     ];
 
-    var svg = d3.select('#animation')
-        .append("svg")
-        .attr("width", w)
-        .attr("height", h);
-    svg.append("rect")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("fill", "#ddd");
+    
 
-    var graph = new NetworkGraph(gs, svg, nodes, edges, opColours);
+    var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibW5vb25lOTYiLCJhIjoiY2s4MGZjZ202MDB6MjNmbXh3eWNnYTlkaCJ9.tmdycTjo3Z40bwpTw3Xpgw';
+
+    var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
+        streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
+
+    var map = L.map('map', {layers: [grayscale]}).setView([53.347443, -6.262138], 13);
+    var baseLayers = {
+        "Grayscale": grayscale,
+        "Streets": streets
+    };
+
+    L.control.layers(baseLayers).addTo(map);
+				
+	/* Initialize the SVG layer */
+	map._initPathRoot()    
+
+	/* We simply pick up the SVG from the map object */
+	var svg = d3.select("#map").select("svg"),
+	g = svg.append("g");
+
+    var graph = new NetworkGraph(gs, g, nodes, edges, opColours, map);
     gs.SetNetworkGraph(graph);
     
     // var charts = new ChartManager(gs);

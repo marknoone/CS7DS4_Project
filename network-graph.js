@@ -15,10 +15,11 @@ const minFontDist = 2, maxFontDist = 18;
 // ------------------------------------------------------------
 // ----------------------- Constructor ------------------------
 // ------------------------------------------------------------
-var NetworkGraph = function(globalState, svg, nodes, edges, colours){
+var NetworkGraph = function(globalState, svg, nodes, edges, colours, map){
     this.nodes   = nodes   || [];
     this.edges   = edges   || [];
     this.colours = colours || [];
+    this.map     = map
     this.globalState = globalState;
     this.latLimits        = { min: minLat,         max: maxLat        }
     this.lngLimits        = { min: minLng,         max: maxLng        }
@@ -77,18 +78,18 @@ var NetworkGraph = function(globalState, svg, nodes, edges, colours){
         .range([thisGraph.fontDistLimits.max, thisGraph.fontDistLimits.min]);
     
     // Register zoom behaviour callbacks ---------------------
-    this.svg.call(d3.zoom()
-        .scaleExtent([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])    
-        .on("zoom", function(){
-            thisGraph.zoomed.call(thisGraph);
-        })
-        .on("start", function(){
-            d3.select('body').style("cursor", "move");
-         })
-        .on("end", function(){
-            d3.select('body').style("cursor", "auto");
-        }))
-        .on("dblclick.zoom", null);
+    // this.svg.call(d3.zoom()
+    //     .scaleExtent([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])    
+    //     .on("zoom", function(){
+    //         thisGraph.zoomed.call(thisGraph);
+    //     })
+    //     .on("start", function(){
+    //         d3.select('body').style("cursor", "move");
+    //      })
+    //     .on("end", function(){
+    //         d3.select('body').style("cursor", "auto");
+    //     }))
+    //     .on("dblclick.zoom", null);
 
     // Register callbacks for mouse/key events ----------------
     this.svg.on("mousedown", function(d){ thisGraph.svgMouseDown.call(thisGraph, d);});
@@ -199,53 +200,57 @@ NetworkGraph.prototype.updateGraph = function(){
         return d === state.selectedEdge;
       })
       .attr("data-distance", function(d){ return util.dist(
-        thisGraph.xScale(d.source.lng), // x1
-        thisGraph.xScale(d.target.lng), // x2
-        thisGraph.yScale(d.source.lat), // y1
-        thisGraph.yScale(d.target.lat)  // y2
-       )})
+        thisGraph.map.latLngToLayerPoint(d.source.LatLng).x, // x1
+        thisGraph.map.latLngToLayerPoint(d.target.LatLng).x, // x2
+        thisGraph.map.latLngToLayerPoint(d.source.LatLng).y, // y1
+        thisGraph.map.latLngToLayerPoint(d.target.LatLng).y  // y2
+     )})
       .attr("stroke", function(d){ 
         return thisGraph.colours[d.source.operator]? thisGraph.colours[d.source.operator] : "#333"})
       .attr("stroke-width", thisGraph.lineStrokeScale(thisGraph.scale) + "px")
       .attr("d", function(d){
-        return "M" + thisGraph.xScale(d.source.lng) + "," + thisGraph.yScale(d.source.lat) + 
-            "L" + thisGraph.xScale(d.target.lng) + "," + thisGraph.yScale(d.target.lat);
+        return "M" + thisGraph.map.latLngToLayerPoint(d.source.LatLng).x + "," + thisGraph.map.latLngToLayerPoint(d.source.LatLng).y + 
+            "L" + thisGraph.map.latLngToLayerPoint(d.target.LatLng).x + "," + thisGraph.map.latLngToLayerPoint(d.target.LatLng).y;
       });
 
     this.paths.enter()
       .append("path")
       .classed("link", true)
       .attr("data-distance", function(d){ return util.dist(
-          thisGraph.xScale(d.source.lng), // x1
-          thisGraph.xScale(d.target.lng), // x2
-          thisGraph.yScale(d.source.lat), // y1
-          thisGraph.yScale(d.target.lat)  // y2
+          thisGraph.map.latLngToLayerPoint(d.source.LatLng).x, // x1
+          thisGraph.map.latLngToLayerPoint(d.target.LatLng).x, // x2
+          thisGraph.map.latLngToLayerPoint(d.source.LatLng).y, // y1
+          thisGraph.map.latLngToLayerPoint(d.target.LatLng).y  // y2
        )})
       .attr("stroke", function(d){ 
         return thisGraph.colours[d.source.operator]? thisGraph.colours[d.source.operator] : "#333"})
       .attr("stroke-width", thisGraph.lineStrokeScale(thisGraph.scale) + "px")
       .attr("d", function(d){
-        return "M" + thisGraph.xScale(d.source.lng) + "," + thisGraph.yScale(d.source.lat) + 
-            "L" + thisGraph.xScale(d.target.lng) + "," + thisGraph.yScale(d.target.lat);
+        return "M" + thisGraph.map.latLngToLayerPoint(d.source.LatLng).x + "," + thisGraph.map.latLngToLayerPoint(d.source.LatLng).y + 
+            "L" + thisGraph.map.latLngToLayerPoint(d.target.LatLng).x + "," + thisGraph.map.latLngToLayerPoint(d.target.LatLng).y;
       });
 
     this.paths.exit().remove();
     
     // Update nodes ..........................................
     this.circles = this.circles.data(this.nodes, function(d){ return d.id;});
-    this.circles
-        .attr("transform", function(d){
-            return "translate(" + thisGraph.xScale(d.lng) + "," + thisGraph.yScale(d.lat) + ")";})
-        .attr("stroke", function(d){ 
-            return thisGraph.colours[d.operator]? thisGraph.colours[d.operator] : "#333"});
+    this.circles.attr("transform", function(d) { 
+        return "translate("+ 
+            thisGraph.map.latLngToLayerPoint(d.LatLng).x +","+ 
+            thisGraph.map.latLngToLayerPoint(d.LatLng).y +")";
+    })
+    .attr("stroke", function(d){ 
+        return thisGraph.colours[d.operator]? thisGraph.colours[d.operator] : "#333"});
 
     var newGs= this.circles.enter()
           .append("g");
 
     newGs.classed(consts.circleGClass, true)
-       .attr("transform", function(d){
-          return "translate(" + thisGraph.xScale(d.lng) + "," + thisGraph.yScale(d.lat) + ")";
-       })
+        .attr("transform", function(d) { 
+            return "translate("+ 
+                thisGraph.map.latLngToLayerPoint(d.LatLng).x +","+ 
+                thisGraph.map.latLngToLayerPoint(d.LatLng).y +")";
+        })
        .attr("stroke", function(d){ 
           return thisGraph.colours[d.operator]? thisGraph.colours[d.operator] : "#333"})
       .on("mouseover", function(d){ /* Adjust CSS classes */ })
