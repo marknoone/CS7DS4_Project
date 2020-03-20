@@ -28,27 +28,77 @@
 			</div>
 		</div>
 
-		<div class="filter ui-controls"><i class="fas fa-layer-group"></i></div>
-		<div class="zoom ui-controls">
+		<div id="filter-btn" class="filter ui-controls"><i class="fas fa-layer-group"></i></div>
+		<div id="zoom-layout" class="zoom ui-controls">
 			<ul>
-				<li id="zoom-plus"><i class="fas fa-plus"></i></li>
-				<li id="zoom-minus"><i class="fas fa-minus"></i></li>
+				<li id="zoom-plus-btn"><i class="fas fa-plus"></i></li>
+				<li id="zoom-minus-btn"><i class="fas fa-minus"></i></li>
 			</ul>
 		</div>
-		<div class="info ui-controls"><i class="fas fa-info"></i></div>
+
+		<div id="info-btn" class="info ui-controls"><i class="fas fa-info"></i></div>
+		<div id="info-layout" class="info">
+			<p>Completed as a requirement of the CS7DS4 module.</p>
+		</div>
+
+		<div id="filter-layout">
+			<ui>
+				<li class="filters">
+					<i class="fas fa-bus"></i>
+					<p>Bus Eireann:</p>  
+					<label class="switch">
+						<input type="checkbox" id="be-toggle">
+						<span class="slider round"></span>
+					</label>
+				</li>
+				<li class="filters">
+					<i class="fas fa-bus"></i>
+					<p>Dublin Bus:</p>  
+					<label class="switch">
+						<input type="checkbox" id="dub-toggle">
+						<span class="slider round"></span>
+					</label>
+				</li>
+				<li class="filters">
+					<i class="fas fa-train"></i>
+					<p>Irish Rail:</p>  
+					<label class="switch">
+						<input type="checkbox" id="ir-toggle">
+						<span class="slider round"></span>
+					</label>
+				</li>
+				<li class="filters">
+					<i class="fas fa-bus"></i>
+					<p>Go Ahead:</p>  
+					<label class="switch">
+						<input type="checkbox" id="gad-toggle">
+						<span class="slider round"></span>
+					</label>
+				</li>
+				<li class="filters">
+					<i class="fas fa-tram"></i>
+					<p>Luas:</p>  
+					<label class="switch">
+						<input type="checkbox" id="luas-toggle">
+						<span class="slider round"></span>
+					</label>
+				</li>
+			</ui>
+		</div>
+		
 
 		<div class="popup-layout">
 			<div class="popup">
 				<div class="container-fluid">
 					<div class="row">
-						<div class="col-lg-3">
+						<div class="col-lg-3 h-56">
 							<div class="time-ctrl">
 								<p class="time-sim">17:00:00</p>
 								<p class="time-local"> Local time: 17:00:00 (GMT)</p>
 								<p class="time-local"> Spped: (<span id="sim-speed">1</span>x)</p>
 							</div>
 						</div>
-						<div class="col-lg-2 offset-lg-2">
+						<div class="col-lg-2 offset-lg-2 h-56">
 							<div class="time-ctrl-btns">
 								<ul>
 									<li><i class="fas fa-lg fa-backward"></i></li>
@@ -57,7 +107,7 @@
 								</ul>
 							</div>
 						</div>
-						<div class="col-lg-4 offset-lg-1">
+						<div class="col-lg-4 offset-lg-1 h-56">
 							<div class="sh-metrics">
 								<div class="vehicle-metrics">
 									<ul><li class="vehicle-metric">
