@@ -15,10 +15,11 @@ const minFontDist = 2, maxFontDist = 18;
 // ------------------------------------------------------------
 // ----------------------- Constructor ------------------------
 // ------------------------------------------------------------
-var NetworkGraph = function(svg, nodes, edges, colours){
+var NetworkGraph = function(globalState, svg, nodes, edges, colours){
     this.nodes   = nodes   || [];
     this.edges   = edges   || [];
     this.colours = colours || [];
+    this.globalState = globalState;
     this.latLimits        = { min: minLat,         max: maxLat        }
     this.lngLimits        = { min: minLng,         max: maxLng        }
     this.fontLimits       = { min: minFont,        max: maxFont       }
