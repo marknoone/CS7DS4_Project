@@ -1,19 +1,22 @@
-const FILTER_OPTIONS = {
-    BUS_EIREANN: {},
-    DUBLIN_BUS:  {},
-    IRISH_RAIL:  {},
-    GO_AHEAD:    {},
-    LUAS:        {}
-}
+const FILTER_OPTIONS = Object.freeze({
+    BUS_EIREANN: "e638a15b-8a8d-468e-8863-bdc14285b8e3",
+    DUBLIN_BUS:  "f5459d13-346d-41f4-b1ba-4435d82eacdb",
+    IRISH_RAIL:  "caeb6d99-5036-4c95-8d84-fbee3d8d927b",
+    GO_AHEAD:    "bd79d6c0-a323-45ff-b8ce-66d413560a81",
+    LUAS:        "f2711938-b24d-4fc1-bcd6-91eb0cda8de5"
+});
 
 var GlobalState = function(){
     // State Components
+    this.dataManager  = null;
     this.networkGraph = null;
     this.chartManager = null;
     this.ui           = null;
+    this.mapManager   = null;
     
     // State vars
     this.simTimeout = null;
+    this.activeStopID = "";
     this.isLoading = true; // TODO: Loading screen
     this.busCount = 0;
     this.trainCount = 0;
@@ -66,6 +69,20 @@ GlobalState.prototype.SetNetworkGraph = function(networkGraph){
     }
 };
 
+GlobalState.prototype.GetMapManager = function(){ return this.mapManager; };
+GlobalState.prototype.SetMapManager = function(mapManager){ 
+    if (mapManager !== null) {
+        this.mapManager = mapManager;
+    }
+};
+
+GlobalState.prototype.GetDataManager = function(){ return this.dataManager; };
+GlobalState.prototype.SetDataManager = function(dataManager){ 
+    if (dataManager !== null) {
+        this.dataManager = dataManager;
+    }
+};
+
 
 // Getters/Setters ( Vars ) 
 GlobalState.prototype.GetSpeed = function(){ return this.speed; };
@@ -106,20 +123,26 @@ GlobalState.prototype.SetIsLoading = function(isLoading){
     }
 };
 
-// TODO: Test empty object on setter...
+GlobalState.prototype.GetActiveStopID = function(){ return this.activeStopID; };
+GlobalState.prototype.SetActiveStopID = function(activeStopID){ 
+    if (activeStopID !== "" || activeStopID !== null) {
+        this.activeStopID = activeStopID;
+    }
+};
+
 GlobalState.prototype.GetFilters = function(){ return this.filters; };
 GlobalState.prototype.SetFilters = function(filter, value){ 
     switch(filter){
         case FILTER_OPTIONS.BUS_EIREANN:
-            this.filters.showBE = value;
+            this.filters.showBE = value; break;
         case FILTER_OPTIONS.DUBLIN_BUS:
-            this.filters.showDB = value;
+            this.filters.showDB = value; break;
         case FILTER_OPTIONS.IRISH_RAIL:
-            this.filters.showIR = value;
+            this.filters.showIR = value; break;
         case FILTER_OPTIONS.GO_AHEAD:
-            this.filters.showGAD = value;
+            this.filters.showGAD = value; break;
         case FILTER_OPTIONS.LUAS:
-            this.filters.showLUAS = value;
+            this.filters.showLUAS = value; break;
         default:
     }
     

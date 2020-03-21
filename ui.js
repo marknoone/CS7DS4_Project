@@ -25,6 +25,7 @@ const fridaySelect      = document.querySelector('#friday');
 const saturdaySelect    = document.querySelector('#saturday');
 const sundaySelect      = document.querySelector('#sunday');
 
+// Change to update charts existing already in ChartManager.
 mondaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "0vw";   });
 tuesdaySelect.addEventListener('click',   function(e) { dayCharts.style.right = "100vw"; });
 wednesdaySelect.addEventListener('click', function(e) { dayCharts.style.right = "200vw"; });

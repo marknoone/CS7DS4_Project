@@ -156,56 +156,11 @@
 					<li class="dayView">
 						<div class="container-fluid">
 							<div class="row justify-center" style="width: 100%">
-								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart1"></div><p>Average Wait Times</p></div></div>
-								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity1"></div><p>Vehicles Using Stop</p></div></div>
-							</div>
-						</div>
-					</li>
-					<li class="dayView">
-						<div class="container-fluid">
-							<div class="row justify-center" style="width: 100%">
-								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart2"></div><p>Average Wait Times</p></div></div>
-								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity2"></div><p>Vehicles Using Stop</p></div></div>
-							</div>
-						</div>
-					</li>
-					<li class="dayView">
-						<div class="container-fluid">
-							<div class="row justify-center" style="width: 100%">
-								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart3"></div><p>Average Wait Times</p></div></div>
-								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity3"></div><p>Vehicles Using Stop</p></div></div>
-							</div>
-						</div>
-					</li>
-					<li class="dayView">
-						<div class="container-fluid">
-							<div class="row justify-center" style="width: 100%">
-								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart4"></div><p>Average Wait Times</p></div></div>
-								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity4"></div><p>Vehicles Using Stop</p></div></div>
-							</div>
-						</div>
-					</li>
-					<li class="dayView">
-						<div class="container-fluid">
-							<div class="row justify-center" style="width: 100%">
-								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart5"></div><p>Average Wait Times</p></div></div>
-								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity5"></div><p>Vehicles Using Stop</p></div></div>
-							</div>
-						</div>
-					</li>
-					<li class="dayView">
-						<div class="container-fluid">
-							<div class="row justify-center" style="width: 100%">
-								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart6"></div><p>Average Wait Times</p></div></div>
-								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity6"></div><p>Vehicles Using Stop</p></div></div>
-							</div>
-						</div>
-					</li>
-					<li class="dayView">
-						<div class="container-fluid">
-							<div class="row justify-center" style="width: 100%">
-								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart7"></div><p>Average Wait Times</p></div></div>
-								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity7"></div><p>Vehicles Using Stop</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="heatChart"></div><p>Average Wait Times</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="vehicleActivity"></div><p>Vehicles Using Stop</p></div></div>
+								<div class="col-lg-2"><div class="popup-chart"><div id="surroundingStops"></div><p>Distance From Surrounding Stops</p></div></div> <!-- Circular Bar plot (bar faces direction of travel) -->
+								<div class="col-lg-2"><div class="popup-chart"><div id="routeShare"></div><p>Route Share At Stop</p></div></div> <!-- Radar Chart where every side as a time -->
+								<div class="col-lg-2"><div class="popup-chart"><div id="travelTime"></div><p>Travel Time to Popular Destinations</p></div></div> <!-- Stacked Bar Plot -->
 							</div>
 						</div>
 					</li>
@@ -216,9 +171,10 @@
 		<script type="text/javascript" src="util.js"></script>
 		<script type="text/javascript" src="state.js"></script>
 		<script type="text/javascript" src="data-manager.js"></script>
-		<script type="text/javascript" src="popup-charts.js"></script>
+		<script type="text/javascript" src="chart-manager.js"></script>
 		<script type="text/javascript" src="network-graph.js"></script>
 		<script type="text/javascript" src="ui.js"></script>
+		<script type="text/javascript" src="map.js"></script>
 		<script type="text/javascript" src="script.js"></script>
     </body>
 </html>

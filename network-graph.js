@@ -11,13 +11,20 @@ const minLineStroke = 0.5, maxLineStroke = 6;
 const minFont = 1, maxFont = 12; 
 const minFontDist = 2, maxFontDist = 18; 
 
+const opColours = { 
+    LUAS: "#6237A1", // Luas
+    GAD:  "#00A7DF", // Go Ahead
+    DUB:  "#FDCA01", // Dublin Bus
+    IR:   "#32A441", // Irish Rail
+    BE:   "#CD1C38"  // Bus Eireann
+}
 
 // ------------------------------------------------------------
 // ----------------------- Constructor ------------------------
 // ------------------------------------------------------------
-var NetworkGraph = function(globalState, svg, nodes, edges, colours, map){
-    this.nodes   = nodes   || [];
-    this.edges   = edges   || [];
+var NetworkGraph = function(globalState, colours){
+    this.nodes   = [];
+    this.edges   = [];
     this.colours = colours || [];
     this.map     = map
     this.globalState = globalState;
@@ -40,7 +47,8 @@ var NetworkGraph = function(globalState, svg, nodes, edges, colours, map){
         lastKeyDown: -1
     };
 
-    this.svg = svg;
+    
+    this.svg = d3.select("#map").select("svg");
     var svgG = this.svgG = svg.append("g")
         .classed("graph", true);
     
@@ -184,6 +192,45 @@ NetworkGraph.prototype.svgKeyDown = function() {
       break;
     }
  };
+
+// Build --------------------------------------------------
+NetworkGraph.prototype.buildGraph = function(){
+    // Populate nodes
+    stopData.forEach( stop => {
+    
+        // TODO: push segment congestion data into node
+        nodes.push({
+            title: stop.stop_name, 
+            id: stop.stop_id, 
+            lat: stop.stop_lat, 
+            lng: stop.stop_lon, 
+            operator: "LUAS",
+        })
+
+        loc = [d.lat, d.lng];
+        try{
+            d.LatLng = new L.LatLng(loc[0], loc[1]);
+        } catch(err) {
+            console.log('error', d.LatLng, err)
+        }
+
+    })
+
+    // Each edge must have their trip encoded for simulation
+    // Source edge is the owner
+    var edges = [
+        {
+            source: nodes[1], 
+            target: nodes[0], 
+            children: [], 
+            departures:[{
+                origin:{LatLng: "", time: ""}, 
+                destination:{LatLng: "", Time:""} 
+            }]
+        },
+        
+    ];
+};
 
 // Update -------------------------------------------------
 NetworkGraph.prototype.updateGraph = function(){
