@@ -18,9 +18,9 @@ const CHART_TYPES = Object.freeze({
     STACKED_BAR_CHART:          "d1d6b1d4-4a69-4a7d-bc7a-5713b6886a22"
 });
 
-var ChartManager = function (globalState, dataManger) {
+var ChartManager = function (globalState) {
     this.gs = globalState;
-    this.dm = dataManger;
+    this.dm = this.gs.GetDataManager();
 
     // Active charts
     this.heatmap                = null;
@@ -40,7 +40,7 @@ ChartManager.prototype.UpdateChart = function(chartUpdateReq){
 
 ChartManager.prototype.AddChartToElem = function(chartReq){
     var svg  = d3.select(chartReq.elemID).append("svg").attr("width", chartSize).attr("height", chartSize);
-    var data = this.dataManger.GetStop(this.globalState.GetActiveStopID());
+    var data = this.dm.GetStop(this.gs.GetActiveStopID());
 
     switch(chartReq.type){
         case CHART_TYPES.HEATMAP:

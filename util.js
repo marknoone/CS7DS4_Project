@@ -5,7 +5,7 @@ const util = {
         var b = y1 - y2;
         return Math.sqrt( a*a + b*b );
     },
-    GetDatesForCurrentWeek: function(date){
+    GetDatesForWeek: function(date){
         // Source: https://stackoverflow.com/questions/8381427/get-start-date-and-end-date-of-current-week-week-start-from-monday-and-end-with/24625489
         var today = date || new Date().setHours(0, 0, 0, 0);
         var day = today.getDay();
@@ -33,7 +33,7 @@ const util = {
             day   = gtfsStringDate.slice(6, 8);
         return new Date(parseInt(year), parseInt(month), parseInt(day));
     },
-    ToGTFSDate: function(date){return "" + date.getFullYear() + getMonth() + getDate()},
+    ToGTFSDate: function(date){return "" + date.getFullYear() + date.getMonth() + date.getDate()},
     IsDateBetweenGTFSDates: function(date, gtfsDate1, gtfsDate2) {
         var g1 = this.ParseGTFSDate(gtfsDate1).getTime(),
             g2 = this.ParseGTFSDate(gtfsDate2).getTime();

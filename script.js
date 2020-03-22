@@ -18,11 +18,14 @@
 
 var gs = new GlobalState()
 gs.SetDataManager(new DataManager(gs));
-gs.SetChartManager(new ChartManager(gs));
-gs.SetMapManager(new MapManager(gs));
-gs.SetNetworkGraph(new NetworkGraph(gs));
-gs.SetUI(new UIManager(gs));
+gs.GetDataManager().ParseGTFS("LUAS", () => {
+    console.log(gs.GetDataManager().chartData["822GA00058"]);
+});
+// gs.SetChartManager(new ChartManager(gs));
+// gs.SetMapManager(new MapManager(gs));
+// gs.SetNetworkGraph(new NetworkGraph(gs));
+// gs.SetUI(new UIManager(gs));
 
 // Begin simulation
-gs.Update();
-gs.ClearTimeout(); // TODO: Remove for simulation to be continued.
+// gs.Update();
+// gs.ClearTimeout(); // TODO: Remove for simulation to be continued.
