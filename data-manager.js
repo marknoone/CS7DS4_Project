@@ -7,11 +7,11 @@ const TRANSIT_TYPE = Object.freeze({
 
 // Filepaths for GTFS files
 const  opInfo = {
-    "LUAS": { path: "assets/gtfs/luas/", tag:"luas", mode: TRANSIT_TYPE.TRAM },
-    "GAD": { path: "assets/gtfs/goahead/", tag:"goahead"},
-    "DUB": { path: "assets/gtfs/dublinbus/", tag:"dublinbus"},
-    "IR":  { path: "assets/gtfs/irishrail/", tag:"irishrail"},
-    "BE":  { path: "assets/gtfs/buseireann/", tag:"buseireann"},
+    "LUAS": { path: "assets/gtfs/luas/",        tag:"luas",         mode: TRANSIT_TYPE.TRAM },
+    "GAD":  { path: "assets/gtfs/goahead/",     tag:"goahead",      mode: TRANSIT_TYPE.BUS},
+    "DUB":  { path: "assets/gtfs/dublinbus/",   tag:"dublinbus",    mode: TRANSIT_TYPE.BUS},
+    "IR":   { path: "assets/gtfs/irishrail/",   tag:"irishrail",    mode: TRANSIT_TYPE.TRAIN},
+    "BE":   { path: "assets/gtfs/buseireann/",  tag:"buseireann",   mode: TRANSIT_TYPE.BUS},
 };
 
 
@@ -25,6 +25,15 @@ var DataManager = function(gs){
     this.tripMap        = {}; // Contains all trip info by TripID
     this.services       = {}; // Operating services
     this.chartData      = {}; // Data precomputed for chart lookup.
+}
+
+DataManager.prototype.GetStopCharts = function(){ return this.chartData; }
+DataManager.prototype.GetStopChart  = function(ID){
+    if (this.chartData == null) {
+        console.error("GTFS not yet parsed.");
+        return null;
+    }
+    return this.chartData[ID];
 }
 
 DataManager.prototype.GetStops = function(){ return this.stops; }
@@ -169,7 +178,6 @@ DataManager.prototype.CalculateStopChartData = function(cb){
         return
     }
 
-    var getOrigID = function(s){ return s.split(":")[1]}
     var getSeconds = function(a){ 
         var minutes = (a.getUTCHours() * 60) + a.getUTCMinutes();
         return (minutes * 60) + a.getUTCSeconds();
@@ -211,7 +219,7 @@ DataManager.prototype.CalculateStopChartData = function(cb){
 
         // Place into chart data
         var routes = Object.keys(results);
-        thisDM.chartData[s.ID] = { 
+        thisDM.chartData[key] = { 
             Heatmap: routes.map(function(r){ 
                 return { route: r, values: Object.keys(results[r]).map(function(t){
                     return { time: t, value: results[r][t].AvgWait };

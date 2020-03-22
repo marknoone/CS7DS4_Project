@@ -30,7 +30,7 @@ var ChartManager = function (globalState) {
 
     this.AddChartToElem({elemID: "#heatChart",          type: CHART_TYPES.HEATMAP});
     this.AddChartToElem({elemID: "#vehicleActivity",    type: CHART_TYPES.CONNECTED_SCATTER_PLOT});
-    this.AddChartToElem({elemID: "#routeShare",         type: CHART_TYPES.RADAR});
+    // this.AddChartToElem({elemID: "#routeShare",         type: CHART_TYPES.RADAR});
 }
 
 ChartManager.prototype.UpdateChart = function(chartUpdateReq){
@@ -40,17 +40,17 @@ ChartManager.prototype.UpdateChart = function(chartUpdateReq){
 
 ChartManager.prototype.AddChartToElem = function(chartReq){
     var svg  = d3.select(chartReq.elemID).append("svg").attr("width", chartSize).attr("height", chartSize);
-    var data = this.dm.GetStop(this.gs.GetActiveStopID());
-
+    var data = this.dm.GetStopChart(this.gs.GetActiveStopID());
+    
     switch(chartReq.type){
         case CHART_TYPES.HEATMAP:
-            return this.AttachHeatmap(svg, data);
+            return this.AttachHeatmap(svg, data.Heatmap);
         case CHART_TYPES.CONNECTED_SCATTER_PLOT:
-            return this.AttachConnectedScatterPlot(svg, data);
+            return this.AttachConnectedScatterPlot(svg, data.ConnectedScatterPlot);
         case CHART_TYPES.RADAR:
-            return this.AttachRadar(svg, data);
+            return this.AttachRadar(svg, data.RadarChart);
         case CHART_TYPES.STACKED_BAR_CHART:
-            return this.AttachStackedBarChart(svg, data);
+            return this.AttachStackedBarChart(svg, data.StackedBarChart);
         default:
             console.error("No valid chart type specified..");
             return null;
@@ -116,7 +116,8 @@ ChartManager.prototype.AttachHeatmap = function(svg, data){
 }
 
 ChartManager.prototype.AttachConnectedScatterPlot = function(svg, data){
-    var myColor = d3.scaleOrdinal().domain(allGroup).range(d3.schemeSet2);
+    var allGroups = data.map(d => d.route);
+    var myColor = d3.scaleOrdinal().domain(allGroups).range(d3.schemeSet2);
     
     // Add X axis
     var x = d3.scaleLinear().domain([0,10]).range([ 0, chartSize ]);
@@ -171,7 +172,7 @@ ChartManager.prototype.AttachRadar = function(svg, data){
         opacityCircles: 0.1, 	//The opacity of the circles of each blob
         strokeWidth: 2, 		//The width of the stroke around each blob
         roundStrokes: true,     //If true the area and stroke will follow a round path (cardinal-closed)
-        color:d3.scale.ordinal().range(["#EDC951","#CC333F","#00A0B0"]),	//Color function
+        color:d3.scaleOrdinal().range(["#EDC951","#CC333F","#00A0B0"]),	//Color function
         maxVal:  0
     };
        
@@ -183,7 +184,7 @@ ChartManager.prototype.AttachRadar = function(svg, data){
         angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
        
     
-    var rScale = d3.scale.linear().range([0, radius]).domain([0, maxValue]); //Scale for the radius
+    var rScale = d3.scaleLinear().range([0, radius]).domain([0, maxValue]); //Scale for the radius
     var g = svg.append("g").attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + (cfg.h/2 + cfg.margin.top) + ")");
     var filter = g.append('defs').append('filter').attr('id','glow'),
         feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation','2.5').attr('result','coloredBlur'),

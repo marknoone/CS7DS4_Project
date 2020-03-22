@@ -27,6 +27,7 @@ const util = {
         })
         return -1
     },
+    GetOrigID: function(s){ return s.split(":")[1]},
     ParseGTFSDate: function(gtfsStringDate){
         var year  = gtfsStringDate.slice(0, 4),
             month = gtfsStringDate.slice(4, 6),

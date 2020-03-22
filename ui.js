@@ -83,7 +83,7 @@ UIManager.prototype.toggleToggle = function(el){
 
 UIManager.prototype.updateUI = function() {
     // Change button icon
-    if (uiState.isPopupShowing) {
+    if (this.state.isPopupShowing) {
         shBtn.childNodes[0].className = "fas fa-angle-down";
         infoLayout.style.top = "58vh";
         infoBtn.style.top = "58vh";
@@ -97,12 +97,12 @@ UIManager.prototype.updateUI = function() {
     }
     
     // Set popup position
-    if (uiState.isPopupShowing) 
+    if (this.state.isPopupShowing) 
         popup.style.bottom = "0px";
     else
         popup.style.bottom = "-424px";
     
-    if(uiState.isFilterShowing){
+    if(this.state.isFilterShowing){
         filterLayout.style.opacity = 1
         setTimeout(function(){ filterLayout.style.visibility = "visible"; }, 150);
     }
@@ -111,7 +111,7 @@ UIManager.prototype.updateUI = function() {
         setTimeout(function(){ filterLayout.style.visibility = "hidden"; }, 150);
     }
     
-    if(uiState.isInfoShowing){
+    if(this.state.isInfoShowing){
         infoLayout.style.opacity = 1
         setTimeout(function(){ infoLayout.style.visibility = "visible"; }, 150);
     }

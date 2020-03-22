@@ -16,7 +16,7 @@ var GlobalState = function(){
     
     // State vars
     this.simTimeout = null;
-    this.activeStopID = "822GA00058";
+    this.activeStopID = "luas:822GA00058";
     this.isLoading = true; // TODO: Loading screen
     this.busCount = 0;
     this.trainCount = 0;

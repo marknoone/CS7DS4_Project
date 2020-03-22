@@ -22,12 +22,11 @@ const opColours = {
 // ------------------------------------------------------------
 // ----------------------- Constructor ------------------------
 // ------------------------------------------------------------
-var NetworkGraph = function(globalState, colours){
+var NetworkGraph = function(globalState){
+    this.gs      = globalState;
     this.nodes   = [];
     this.edges   = [];
-    this.colours = colours || [];
-    this.map     = map
-    this.globalState = globalState;
+    this.map     = globalState.GetMapManager().GetMap();
     this.latLimits        = { min: minLat,         max: maxLat        }
     this.lngLimits        = { min: minLng,         max: maxLng        }
     this.fontLimits       = { min: minFont,        max: maxFont       }
@@ -49,7 +48,7 @@ var NetworkGraph = function(globalState, colours){
 
     
     this.svg = d3.select("#map").select("svg");
-    var svgG = this.svgG = svg.append("g")
+    var svgG = this.svgG = this.svg.append("g")
         .classed("graph", true);
     
     this.paths = svgG.append("g").selectAll("g"); // Path subgraph
@@ -106,7 +105,8 @@ var NetworkGraph = function(globalState, colours){
         .on("keydown", function(){ thisGraph.svgKeyDown.call(thisGraph); })
         .on("keyup", function(){ thisGraph.svgKeyUp.call(thisGraph); });
 
-    window.onresize = function(){ thisGraph.updateWindow(thisGraph.svg); };    
+    window.onresize = function(){ thisGraph.updateWindow(thisGraph.svg); };   
+    this.buildGraph(); 
 };
 
 
@@ -196,45 +196,38 @@ NetworkGraph.prototype.svgKeyDown = function() {
 // Build --------------------------------------------------
 NetworkGraph.prototype.buildGraph = function(){
     // Populate nodes
-    stopData.forEach( stop => {
-    
-        // TODO: push segment congestion data into node
-        nodes.push({
+    var stopData = this.gs.GetDataManager().GetStops(), thisGraph = this;
+    Object.keys(stopData).forEach( stopKey => {
+        var loc = {}, stop = stopData[stopKey];
+        try{ loc = new L.LatLng(stop.LatLng.Lat, stop.LatLng.Lng); } 
+        catch(err) { console.log('error', err) }
+
+        thisGraph.nodes.push({
             title: stop.stop_name, 
-            id: stop.stop_id, 
-            lat: stop.stop_lat, 
-            lng: stop.stop_lon, 
+            id: stop.stop_id,
+            latLng: loc, 
             operator: "LUAS",
         })
 
-        loc = [d.lat, d.lng];
-        try{
-            d.LatLng = new L.LatLng(loc[0], loc[1]);
-        } catch(err) {
-            console.log('error', d.LatLng, err)
-        }
-
+        Object.keys(stop.ConnectedStops).forEach( key => {
+            var tLoc = {}, target = stopData[key];
+            try{ tLoc = new L.LatLng(target.LatLng.Lat, target.LatLng.Lng); } 
+            catch(err) { console.log('error', err) }
+            thisGraph.edges.push({
+                source: { id : stopKey, latLng: loc  },
+                target: { id : key,     latLng: tLoc },
+                children: []
+            })
+        });
     })
-
-    // Each edge must have their trip encoded for simulation
-    // Source edge is the owner
-    var edges = [
-        {
-            source: nodes[1], 
-            target: nodes[0], 
-            children: [], 
-            departures:[{
-                origin:{LatLng: "", time: ""}, 
-                destination:{LatLng: "", Time:""} 
-            }]
-        },
-        
-    ];
 };
 
 // Update -------------------------------------------------
 NetworkGraph.prototype.updateGraph = function(){
-    var thisGraph = this, consts = thisGraph.consts, state = thisGraph.state;
+    var thisGraph = this, 
+        consts = thisGraph.consts, 
+        state = thisGraph.state,
+        stops = this.gs.GetDataManager().GetStops();
 
     // Generate path data with custom D3 keys...
     this.paths = this.paths.data(this.edges, function(d){
@@ -246,35 +239,35 @@ NetworkGraph.prototype.updateGraph = function(){
       .classed(consts.selectedClass, function(d){
         return d === state.selectedEdge;
       })
-      .attr("data-distance", function(d){ return util.dist(
-        thisGraph.map.latLngToLayerPoint(d.source.LatLng).x, // x1
-        thisGraph.map.latLngToLayerPoint(d.target.LatLng).x, // x2
-        thisGraph.map.latLngToLayerPoint(d.source.LatLng).y, // y1
-        thisGraph.map.latLngToLayerPoint(d.target.LatLng).y  // y2
+      .attr("data-distance", function(d){ return util.Distance(
+        thisGraph.map.latLngToLayerPoint(d.source.latLng).x, // x1
+        thisGraph.map.latLngToLayerPoint(d.target.latLng).x, // x2
+        thisGraph.map.latLngToLayerPoint(d.source.latLng).y, // y1
+        thisGraph.map.latLngToLayerPoint(d.target.latLng).y  // y2
      )})
       .attr("stroke", function(d){ 
-        return thisGraph.colours[d.source.operator]? thisGraph.colours[d.source.operator] : "#333"})
+        return opColours[d.source.operator]? opColours[d.source.operator] : "#333"})
       .attr("stroke-width", thisGraph.lineStrokeScale(thisGraph.scale) + "px")
       .attr("d", function(d){
-        return "M" + thisGraph.map.latLngToLayerPoint(d.source.LatLng).x + "," + thisGraph.map.latLngToLayerPoint(d.source.LatLng).y + 
-            "L" + thisGraph.map.latLngToLayerPoint(d.target.LatLng).x + "," + thisGraph.map.latLngToLayerPoint(d.target.LatLng).y;
+        return "M" + thisGraph.map.latLngToLayerPoint(d.source.latLng).x + "," + thisGraph.map.latLngToLayerPoint(d.source.latLng).y + 
+            "L" + thisGraph.map.latLngToLayerPoint(d.target.latLng).x + "," + thisGraph.map.latLngToLayerPoint(d.target.latLng).y;
       });
 
     this.paths.enter()
       .append("path")
       .classed("link", true)
-      .attr("data-distance", function(d){ return util.dist(
-          thisGraph.map.latLngToLayerPoint(d.source.LatLng).x, // x1
-          thisGraph.map.latLngToLayerPoint(d.target.LatLng).x, // x2
-          thisGraph.map.latLngToLayerPoint(d.source.LatLng).y, // y1
-          thisGraph.map.latLngToLayerPoint(d.target.LatLng).y  // y2
+      .attr("data-distance", function(d){ return util.Distance(
+          thisGraph.map.latLngToLayerPoint(d.source.latLng).x, // x1
+          thisGraph.map.latLngToLayerPoint(d.target.latLng).x, // x2
+          thisGraph.map.latLngToLayerPoint(d.source.latLng).y, // y1
+          thisGraph.map.latLngToLayerPoint(d.target.latLng).y  // y2
        )})
       .attr("stroke", function(d){ 
-        return thisGraph.colours[d.source.operator]? thisGraph.colours[d.source.operator] : "#333"})
+        return opColours[d.source.operator]? opColours[d.source.operator] : "#333"})
       .attr("stroke-width", thisGraph.lineStrokeScale(thisGraph.scale) + "px")
       .attr("d", function(d){
-        return "M" + thisGraph.map.latLngToLayerPoint(d.source.LatLng).x + "," + thisGraph.map.latLngToLayerPoint(d.source.LatLng).y + 
-            "L" + thisGraph.map.latLngToLayerPoint(d.target.LatLng).x + "," + thisGraph.map.latLngToLayerPoint(d.target.LatLng).y;
+        return "M" + thisGraph.map.latLngToLayerPoint(d.source.latLng).x + "," + thisGraph.map.latLngToLayerPoint(d.source.latLng).y + 
+            "L" + thisGraph.map.latLngToLayerPoint(d.target.latLng).x + "," + thisGraph.map.latLngToLayerPoint(d.target.latLng).y;
       });
 
     this.paths.exit().remove();
@@ -283,11 +276,11 @@ NetworkGraph.prototype.updateGraph = function(){
     this.circles = this.circles.data(this.nodes, function(d){ return d.id;});
     this.circles.attr("transform", function(d) { 
         return "translate("+ 
-            thisGraph.map.latLngToLayerPoint(d.LatLng).x +","+ 
-            thisGraph.map.latLngToLayerPoint(d.LatLng).y +")";
+            thisGraph.map.latLngToLayerPoint(d.latLng).x +","+ 
+            thisGraph.map.latLngToLayerPoint(d.latLng).y +")";
     })
     .attr("stroke", function(d){ 
-        return thisGraph.colours[d.operator]? thisGraph.colours[d.operator] : "#333"});
+        return opColours[d.operator]? opColours[d.operator] : "#333"});
 
     var newGs= this.circles.enter()
           .append("g");
@@ -295,11 +288,11 @@ NetworkGraph.prototype.updateGraph = function(){
     newGs.classed(consts.circleGClass, true)
         .attr("transform", function(d) { 
             return "translate("+ 
-                thisGraph.map.latLngToLayerPoint(d.LatLng).x +","+ 
-                thisGraph.map.latLngToLayerPoint(d.LatLng).y +")";
+                thisGraph.map.latLngToLayerPoint(d.latLng).x +","+ 
+                thisGraph.map.latLngToLayerPoint(d.latLng).y +")";
         })
        .attr("stroke", function(d){ 
-          return thisGraph.colours[d.operator]? thisGraph.colours[d.operator] : "#333"})
+          return opColours[d.operator]? opColours[d.operator] : "#333"})
       .on("mouseover", function(d){ /* Adjust CSS classes */ })
       .on("mouseout", function(d){ /* Adjust CSS classes */})
       .on("mousedown", function(d){ /* De-register selected node */})
