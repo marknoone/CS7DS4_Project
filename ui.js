@@ -25,22 +25,47 @@ const fridaySelect      = document.querySelector('#friday');
 const saturdaySelect    = document.querySelector('#saturday');
 const sundaySelect      = document.querySelector('#sunday');
 
-// Change to update charts existing already in ChartManager.
-mondaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "0vw";   });
-tuesdaySelect.addEventListener('click',   function(e) { dayCharts.style.right = "100vw"; });
-wednesdaySelect.addEventListener('click', function(e) { dayCharts.style.right = "200vw"; });
-thursdaySelect.addEventListener('click',  function(e) { dayCharts.style.right = "300vw"; });
-fridaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "400vw"; });
-saturdaySelect.addEventListener('click',  function(e) { dayCharts.style.right = "500vw"; });
-sundaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "600vw"; });
+var UIManager = function(gs){
+    this.gs = gs;
+    this.state = {
+        isInfoShowing: false,
+        isFilterShowing: false,
+        isPopupShowing: true
+    }
 
-var uiState = {
-    isInfoShowing: false,
-    isFilterShowing: false,
-    isPopupShowing: true
-}
+    thisUI = this;
+    // Change to update charts existing already in ChartManager.
+    mondaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "0vw";   });
+    tuesdaySelect.addEventListener('click',   function(e) { dayCharts.style.right = "100vw"; });
+    wednesdaySelect.addEventListener('click', function(e) { dayCharts.style.right = "200vw"; });
+    thursdaySelect.addEventListener('click',  function(e) { dayCharts.style.right = "300vw"; });
+    fridaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "400vw"; });
+    saturdaySelect.addEventListener('click',  function(e) { dayCharts.style.right = "500vw"; });
+    sundaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "600vw"; });
 
-function toggleActiveBtn(el){
+    shBtn.addEventListener('click', function(e) {
+        thisUI.state.isPopupShowing = !thisUI.state.isPopupShowing;
+    
+        thisUI.updateUI();  // TODO: Remove and place with render call
+    });
+    
+    filterBtn.addEventListener('click', function(e) {
+        thisUI.state.isFilterShowing = !thisUI.state.isFilterShowing;
+        toggleActiveBtn(filterBtn)
+        thisUI.updateUI(); // TODO: Remove and place with render call
+    });
+    
+    infoBtn.addEventListener('click', function(e) {
+        thisUI.state.isInfoShowing = !thisUI.state.isInfoShowing;
+        toggleActiveBtn(infoBtn)
+        thisUI.updateUI(); // TODO: Remove and place with render call
+    });
+
+    // Start UI
+    this.updateUI();
+};
+
+UIManager.prototype.toggleActiveBtn = function(el){
     if (el.classList.contains("active-btn")) {
         el.classList.remove("active-btn");
     } else {
@@ -48,7 +73,7 @@ function toggleActiveBtn(el){
     }
 }
 
-function toggleToggle(el){
+UIManager.prototype.toggleToggle = function(el){
     if (el.classList.contains("active-toggle")) {
         el.classList.remove("active-toggle");
     } else {
@@ -56,7 +81,7 @@ function toggleToggle(el){
     }
 }
 
-function updateUI() {
+UIManager.prototype.updateUI = function() {
     // Change button icon
     if (uiState.isPopupShowing) {
         shBtn.childNodes[0].className = "fas fa-angle-down";
@@ -70,22 +95,22 @@ function updateUI() {
         infoBtn.style.top = "90vh";
         zoomLayout.style.top = "82vh";
     }
-
+    
     // Set popup position
     if (uiState.isPopupShowing) 
         popup.style.bottom = "0px";
     else
         popup.style.bottom = "-424px";
-
+    
     if(uiState.isFilterShowing){
         filterLayout.style.opacity = 1
         setTimeout(function(){ filterLayout.style.visibility = "visible"; }, 150);
     }
-    else{
+    else {
         filterLayout.style.opacity = 0
         setTimeout(function(){ filterLayout.style.visibility = "hidden"; }, 150);
     }
-
+    
     if(uiState.isInfoShowing){
         infoLayout.style.opacity = 1
         setTimeout(function(){ infoLayout.style.visibility = "visible"; }, 150);
@@ -95,24 +120,3 @@ function updateUI() {
         setTimeout(function(){ infoLayout.style.visibility = "hidden"; }, 150);
     }
 }
-
-shBtn.addEventListener('click', function(e) {
-    uiState.isPopupShowing = !uiState.isPopupShowing;
-
-    updateUI();  // TODO: Remove and place with render call
-});
-
-filterBtn.addEventListener('click', function(e) {
-    uiState.isFilterShowing = !uiState.isFilterShowing;
-    toggleActiveBtn(filterBtn)
-    updateUI(); // TODO: Remove and place with render call
-});
-
-infoBtn.addEventListener('click', function(e) {
-    uiState.isInfoShowing = !uiState.isInfoShowing;
-    toggleActiveBtn(infoBtn)
-    updateUI(); // TODO: Remove and place with render call
-});
-
-// Start UI
-updateUI();

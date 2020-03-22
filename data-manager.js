@@ -20,8 +20,11 @@ const  opInfo = {
 var DataManager = function(gs){
     this.gs             = gs; // Global state object binding. 
     this.stops          = {}; // Data opbjects present for charting.
-    this.stopTimeTrips  = {}  // Stops and Times for each trip (vehicles) 
+    this.stopTimeTrips  = {}; // Stops and Times for each trip (vehicles) 
+    this.routeMap       = {}; // Contains all route info by RouteID
+    this.tripMap        = {}; // Contains all trip info by TripID
     this.services       = {}; // Operating services
+    this.chartData      = {}; // Data precomputed for chart lookup.
 }
 
 DataManager.prototype.GetStops = function(){ return this.stops; }
@@ -51,7 +54,7 @@ DataManager.prototype.GetService  = function(ID){
     return this.services[ID];
 }
 
-DataManager.prototype.ParseGTFS = function(){
+DataManager.prototype.ParseGTFS = async function(){
     Object.keys(opInfo).forEach(key => {
         // 1. Fetch data from disk...
         console.log("Parsing: " + opInfo[key].path);
@@ -63,8 +66,8 @@ DataManager.prototype.ParseGTFS = function(){
         const tripData          = await d3.csv(opInfo[key].path+"trips.csv");
 
         // 2. Create maps for quick lookup.
-        var routeMap; routeData.forEach (function(r){ routeMap[(opInfo[key].tag + ":" + r.route_id)]=r; });
-        var tripMap;  tripData.forEach (function(t){ tripMap[(opInfo[key].tag + ":" + t.trip_id)]=t; });
+        this.routeMap; routeData.forEach (function(r){ this.routeMap[(opInfo[key].tag + ":" + r.route_id)]=r; });
+        this.tripMap;  tripData.forEach (function(t){ this.tripMap[(opInfo[key].tag + ":" + t.trip_id)]=t; });
         
 
         // 3. Populate DataManager stops.
@@ -77,37 +80,44 @@ DataManager.prototype.ParseGTFS = function(){
                 
                 // Information for edges. To be populated below...
                 ConnctedStops: {},
+                Departures:    {},
             };   
         });
         
 
         // 4. Populate DataManager stopTimes
         var prevStopID, prevTripID;
+        
         stopTimeData.forEach(function(st){
             // Map by trip for vehicles
             if (!((opInfo[key].tag + ":" + st.trip_id) in this.stopTimeTrips))  
-                this.stopTimeTrips[(opInfo[key].tag + ":" + st.trip_id)] = {startTime: st.arrival_time}; 
+            this.stopTimeTrips[(opInfo[key].tag + ":" + st.trip_id)] = {startTime: st.arrival_time}; 
             
             this.stopTimeTrips[(opInfo[key].tag + ":" + st.trip_id)].endTime = st.departure_time; 
             this.stopTimeTrips[(opInfo[key].tag + ":" + st.trip_id)][st.stop_sequence] = {
                 arrTime: st.arrival_time, depTime: st.departure_time, stopID: st.stop_id};
-        
+                
+            // Keep track of all stop departures (for chart data)
+            var route = this.tripMap[(opInfo[key].tag + ":" + st.trip_id)].route_id;
+            this.stops[(opInfo[key].tag + ":" + st.stop_id)]
+                .ArrDep[(st.arrival_time + "-" + st.departure_time)] = route;
+                
             // Populate stop operating routes
-            var route = tripMap[(opInfo[key].tag + ":" + st.trip_id)].route_id;
+            var getRoute = function(route){
+                return this.routeMap[(opInfo[key].tag + ":" + route)].route_short_name == ""?
+                            this.routeMap[(opInfo[key].tag + ":" + route)].route_long_name:
+                            this.routeMap[(opInfo[key].tag + ":" + route)].route_short_name;
+            }
+
             if(prevStopID && prevTripID === st.trip_id){
                 if(!(st.stop_id in this.stops[(opInfo[key].tag + ":" + prevStopID)].ConnctedStops)){
                     this.stops[(opInfo[key].tag + ":" + prevStopID)]
                         .ConnctedStops[(opInfo[key].tag + ":" + st.stop_id)] = []
                 }
-
                
                 this.stops[(opInfo[key].tag + ":" + prevStopID)]
-                    .ConnctedStops[(opInfo[key].tag + ":" + st.stop_id)].push({
-                        RouteID: routeMap[(opInfo[key].tag + ":" + route)].route_short_name == ""?
-                            routeMap[(opInfo[key].tag + ":" + route)].route_long_name:
-                            routeMap[(opInfo[key].tag + ":" + route)].route_short_name, 
-                        Mode: opInfo[key].mode 
-                    });
+                    .ConnectedStops[(opInfo[key].tag + ":" + st.stop_id)].push({
+                        RouteID:  getRoute(route), Mode: opInfo[key].mode });
             }
         
             prevTripID = st.trip_id;
@@ -148,10 +158,75 @@ DataManager.prototype.ParseGTFS = function(){
     });
 }
 
-DataManager.prototype.CalculateStopChartData = function(){
-    // TODO: Calculate chart info.
-    // Information for charts
-    // Heatmap:                [{route: "", values: [{time: "", value: ""}] }],
-    // ConnectedScatterPlot:   [{route: "", values: [{time: "", value: ""}] }],
+DataManager.prototype.CalculateStopChartData = function(stopID){
+    var isEmpty = function(obj){return Object.keys(obj).length === 0 && obj.constructor === Object}
+    if (!isEmpty(this.chartData)) return;
+    if (isEmpty(this.stops) || isEmpty(this.stopsData)){
+        console.error("Chart Err: A GTFS dataset must first be parsed.")
+        return
+    }
+
+    var getOrigID = function(s){ return s.split(":")[1]}
+    var getSeconds = function(a){ 
+        var minutes = (a.getUTCHours() * 60) + a.getUTCMinutes();
+        return (minutes * 60) + a.getUTCSeconds();
+    }
+    var getTimesFromKey = function(key){ 
+        [arrTime, depTime] = k.split("-");
+        var arrival = arrTime.split(":"), departure = depTime.split(":"); 
+        if (arrival[0] === "24" ) arrival[0] = "0"; 
+        if (departure[0] === "24" ) departure[0] = "0"; 
+        return [ 
+            new Date(0, 0, 0, arrival[0], arrival[1], arrival[2], 0),
+            new Date(0, 0, 0, departure[0], departure[1], departure[2], 0)
+        ];
+    }
+
+    
+    this.stops.forEach(function(s){
+        var results = {};
+
+        // Calculate dat into results
+        Object.keys(s.ArrDep).forEach(function(k){
+            [arrTime, depTime] = getTimesFromKey(k);
+            if(!(s.ArrDep[k] in results)) results[s.ArrDep[k]] = {}
+            if(!(arrTime.getHours() in results[s.ArrDep[k]])) 
+                results[s.ArrDep[k]][arrTime.getHours()] = {
+                    lastTime: 0, AvgWait: 0, VehicleCount: 0 };
+
+            var last = results[s.ArrDep[k]][arrTime.getHours()].lastTime;
+            var diff = getSeconds(depTime) - getSeconds(last);
+            results[s.ArrDep[k]][arrTime.getHours()] = {
+                lastTime: depTime,
+                AvgWait: results[s.ArrDep[k]][arrTime.getHours()].AvgWait + diff,
+                VehicleCount: results[s.ArrDep[k]][arrTime.getHours()].VehicleCount +1
+            }
+        });
+
+        // Finalize AvgWait 
+        Object.keys(results).forEach(k => Object.keys(results[k]).forEach(t => {
+            results[k][t].AvgWait = results[k][t].AvgWait / results[k][t].VehicleCount;
+        }));
+
+        // Place into chart data
+        var routes = Object.keys(results);
+        this.chartData[s.ID] = { 
+            Heatmap: routes.map(function(r){ 
+                return { route: r, values: Object.keys(results[r]).map(function(t){
+                    return { time: t, value: results[r][t].AvgWait };
+                })}
+            }), 
+            ConnectedScatterPlot: routes.map(function(r){ 
+                return { route: r, values: Object.keys(results[r]).map(function(t){
+                    return { time: t, value: results[r][t].VehicleCount };
+                })}
+            }), 
+            RadarChart: routes.map(function(r){ 
+                return { route: r, values: Object.keys(results[r]).map(function(t){
+                    return { time: t, value: results[r][t].VehicleCount };
+                })}
+            })
+        }
+    });
 };
 
