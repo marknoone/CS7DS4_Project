@@ -14,6 +14,8 @@ const  opInfo = {
     "BE":   { path: "assets/gtfs/buseireann/",  tag:"buseireann",   mode: TRANSIT_TYPE.BUS},
 };
 
+// Optional route colours
+const colours = ["#EDC951","#CC333F","#00A0B0"];
 
 // DataManager is responsible for parsing data and building 
 // data structures to provide data at each time tick
@@ -43,6 +45,15 @@ DataManager.prototype.GetStop  = function(ID){
         return null;
     }
     return this.stops[ID];
+}
+
+DataManager.prototype.GetRoutes = function(){ return this.routeMap; }
+DataManager.prototype.GetRoute  = function(ID){
+    if (this.routeMap == null) {
+        console.error("GTFS not yet parsed.");
+        return null;
+    }
+    return this.routeMap[ID];
 }
 
 DataManager.prototype.GetStopTimeTrips = function(){ return this.stopTimeTrips; }
@@ -193,7 +204,7 @@ DataManager.prototype.CalculateStopChartData = function(cb){
 
     
     Object.keys(this.stops).forEach(function(key){
-        var results = {}, s = thisDM.stops[key];
+        var results = {}, s = thisDM.stops[key], maxVehicleCount = 0;
 
         // Calculate dat into results
         Object.keys(s.ArrDep).forEach(function(k){
@@ -210,11 +221,14 @@ DataManager.prototype.CalculateStopChartData = function(cb){
                 AvgWait: results[s.ArrDep[k]][arrTime.getHours()].AvgWait + diff,
                 VehicleCount: results[s.ArrDep[k]][arrTime.getHours()].VehicleCount +1
             }
+            if (results[s.ArrDep[k]][arrTime.getHours()].VehicleCount > maxVehicleCount)
+                maxVehicleCount = results[s.ArrDep[k]][arrTime.getHours()].VehicleCount
         });
 
         // Finalize AvgWait 
         Object.keys(results).forEach(k => Object.keys(results[k]).forEach(t => {
             results[k][t].AvgWait = results[k][t].AvgWait / results[k][t].VehicleCount;
+            results[k][t].RouteSharePerc = results[k][t].VehicleCount / maxVehicleCount;
         }));
 
         // Place into chart data
@@ -230,9 +244,9 @@ DataManager.prototype.CalculateStopChartData = function(cb){
                     return { time: t, value: results[r][t].VehicleCount };
                 })}
             }), 
-            RadarChart: routes.map(function(r){ 
+            RadarChart: routes.map(function(r, i){ 
                 return { route: r, values: Object.keys(results[r]).map(function(t){
-                    return { time: t, value: results[r][t].VehicleCount };
+                    return { time: t, colour: colours[i], value: results[r][t].RouteSharePerc };
                 })}
             })
         }
