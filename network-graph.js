@@ -23,9 +23,10 @@ const opColours = {
 // ----------------------- Constructor ------------------------
 // ------------------------------------------------------------
 var NetworkGraph = function(globalState){
-    this.gs      = globalState;
-    this.nodes   = [];
-    this.edges   = [];
+    this.gs       = globalState;
+    this.nodes    = [];
+    this.edges    = [];
+    this.vehicles = [];
     this.map     = globalState.GetMapManager().GetMap();
     this.latLimits        = { min: minLat,         max: maxLat        }
     this.lngLimits        = { min: minLng,         max: maxLng        }
@@ -221,6 +222,9 @@ NetworkGraph.prototype.buildGraph = function(){
             })
         });
     })
+
+    // Add vehicles
+    var tripData = this.gs.GetDataManager().GetStopTimeTrips(), thisGraph = this;
 };
 
 // Update -------------------------------------------------
@@ -310,6 +314,43 @@ NetworkGraph.prototype.updateGraph = function(){
 
     this.circles.exit().remove();
   };
+
+NetworkGraph.prototype.updateVehicles = function(){
+    var thisGraph = this, 
+        consts = thisGraph.consts, 
+        state = thisGraph.state,
+        stops = this.gs.GetDataManager().GetStops();
+
+    // Remove all older elements
+    d3.selectAll(".vehicle").remove();
+
+    this.activeVehicles = this.activeVehicles.data(this.vehicles, function(d){ return d.id;});
+    this.activeVehicles.attr("transform", function(d) { 
+        return "translate("+ 
+            thisGraph.map.latLngToLayerPoint(d.latLng).x +","+ 
+            thisGraph.map.latLngToLayerPoint(d.latLng).y +")";
+    })
+    .attr("fill", function(d){ return opColours[d.operator]? opColours[d.operator] : "#333"});
+
+    var newGs= this.activeVehicles.enter().append("g");
+    newGs.classed("vehicle", true)
+        .attr("transform", function(d) { 
+            return "translate("+ 
+                thisGraph.map.latLngToLayerPoint(d.latLng).x +","+ 
+                thisGraph.map.latLngToLayerPoint(d.latLng).y +")";
+        })
+       .attr("fill", function(d){ return opColours[d.operator]? opColours[d.operator] : "#333"})
+      .on("mouseover", function(d){ /* Adjust CSS classes */ })
+      .on("mouseout", function(d){ /* Adjust CSS classes */})
+      .on("mousedown", function(d){ /* De-register selected node */})
+      .on("mouseup", function(d){ /* Register selected node */ });
+
+    newGs.append("circle")
+        .attr("r", String(thisGraph.zoomScale(thisGraph.scale)))
+        .attr("fill", function(d){ return opColours[d.operator]? opColours[d.operator] : "#333"});
+
+    this.activeVehicles.exit().remove();
+}
 
 NetworkGraph.prototype.updateScales = function(){
     var thisGraph = this;

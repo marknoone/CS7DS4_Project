@@ -6,7 +6,15 @@ const zoomMinusBtn = document.querySelector('#zoom-minus-btn');
 const zoomLayout = document.querySelector('#zoom-layout');
 const infoBtn = document.querySelector('#info-btn');
 const infoLayout = document.querySelector('#info-layout');
+const clock = document.querySelector('#clock');
+const simClock = document.querySelector('#simClock');
+const simSpeed = document.querySelector('#simSpeed');
 const popup = document.getElementsByClassName('popup-layout')[0];
+
+// Speed controls
+const ffBtn = document.querySelector('#ffBtn');
+const playPauseBtn = document.querySelector('#playPauseBtn');
+const rewBtn = document.querySelector('#rewBtn');
 
 // Toggles
 const beToggle   = document.querySelector('#be-toggle');
@@ -63,9 +71,16 @@ var UIManager = function(gs){
 
     zoomPlusBtn.addEventListener('click', function(e) { thisUI.map.zoomIn(); });
     zoomMinusBtn.addEventListener('click', function(e) { thisUI.map.zoomOut(); });
+    ffBtn.addEventListener('click', function(e) { thisUI.gs.IncSpeed(); });
+    playPauseBtn.addEventListener('click', function(e) { thisUI.gs.TogglePause(); });
+    rewBtn.addEventListener('click', function(e) { thisUI.gs.DecSpeed(); });
 
     // Start UI
     this.updateUI();
+    this.UpdateClock();
+    this.UpdateSimClock();
+    this.UpdateSimSpeed();
+    this.UpdatePlayPauseBtn();
 };
 
 UIManager.prototype.toggleActiveBtn = function(el){
@@ -122,4 +137,29 @@ UIManager.prototype.updateUI = function() {
         infoLayout.style.opacity = 0
         setTimeout(function(){ infoLayout.style.visibility = "hidden"; }, 150);
     }
+}
+
+UIManager.prototype.UpdateClock = function()
+{
+    var date = new Date()
+    var mins = date.getMinutes() < 10 ? "0" + date.getMinutes(): date.getMinutes();
+    var secs = date.getSeconds() < 10 ? "0" + date.getSeconds(): date.getSeconds();
+    clock.innerHTML = date.getHours()+":"+mins+":"+secs+" (GMT)";
+}
+
+UIManager.prototype.UpdateSimClock = function()
+{
+    var date = this.gs.GetSimTime()
+    var mins = date.getMinutes() < 10 ? "0" + date.getMinutes(): date.getMinutes();
+    var secs = date.getSeconds() < 10 ? "0" + date.getSeconds(): date.getSeconds();
+    simClock.innerHTML = date.getHours()+":"+mins+":"+secs;
+}
+
+UIManager.prototype.UpdateSimSpeed = function(){
+    var speed = this.gs.GetSimSpeed();
+    simSpeed.innerHTML = speed;
+}
+UIManager.prototype.UpdatePlayPauseBtn = function(){
+    var isPaused = this.gs.GetIsPaused()
+    playPauseBtn.innerHTML = isPaused? '<i class="fas fa-lg fa-play">':'<i class="fas fa-lg fa-pause">'
 }

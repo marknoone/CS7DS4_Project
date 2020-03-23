@@ -31,5 +31,4 @@ gs.GetDataManager().ParseGTFS("LUAS", () => {
     
     // Begin simulation
     gs.Update();
-    gs.ClearTimeout(); // TODO: Remove for simulation to be continued.
 });

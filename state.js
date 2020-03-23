@@ -6,6 +6,8 @@ const FILTER_OPTIONS = Object.freeze({
     LUAS:        "f2711938-b24d-4fc1-bcd6-91eb0cda8de5"
 });
 
+const SIM_SPEED = [-16, -4, -2, -1, 1, 2, 4, 16]
+
 var GlobalState = function(){
     // State Components
     this.dataManager  = null;
@@ -18,11 +20,13 @@ var GlobalState = function(){
     this.simTimeout = null;
     this.activeStopID = "luas:822GA00058";
     this.isLoading = true; // TODO: Loading screen
+    this.isPaused = true;
+    this.time = new Date().getTime(),
+    this.simTime = new Date(),
+    this.speedIdx = 4;
     this.busCount = 0;
     this.trainCount = 0;
     this.tramCount = 0;
-    this.simTime = 0;
-    this.speed = 1
     this.filters = {
         showBE:   true,
         showIR:   true,
@@ -39,11 +43,25 @@ GlobalState.prototype.ClearTimeout = function(){
 };
 
 GlobalState.prototype.Update = function(){
+    this.ui.UpdateClock(); // Keep clock up do date.
+    
+    var thisState = this, last = this.time, 
+        curr = new Date().getTime(), speedMS = 1000/SIM_SPEED[this.speedIdx];
+    if(curr - last < Math.abs(speedMS) || this.isPaused){
+        this.simTimeout = setTimeout((function(){ this.Update(); }).bind(this), 34);
+        return;
+    }
+    
     // 1. Calculate new time..
+    console.log(speedMS);
+    this.time = curr;
+    this.simTime.setTime(this.simTime.getTime() + (1000 * Math.sign(SIM_SPEED[this.speedIdx]) ));
+    this.ui.UpdateSimClock(); // Keep clock up do date.
+
     // 2. Fetch data for time..
     // 3. Push time to UI..
     // 4. Push time to graph..
-    this.networkGraph.updateGraph();
+    // this.networkGraph.updateGraph();
     this.simTimeout = setTimeout((function(){ this.Update(); }).bind(this), 34);
 }
 
@@ -85,10 +103,21 @@ GlobalState.prototype.SetDataManager = function(dataManager){
 
 
 // Getters/Setters ( Vars ) 
-GlobalState.prototype.GetSpeed = function(){ return this.speed; };
-GlobalState.prototype.SetSpeed = function(speed){ 
-    if (speed !== null) {
-        this.speed = speed;
+GlobalState.prototype.GetIsPaused = function(){ return this.isPaused; }
+GlobalState.prototype.TogglePause = function(){this.isPaused = !this.isPaused; this.ui.UpdatePlayPauseBtn();}
+
+GlobalState.prototype.GetSimTime = function(){ return this.simTime; };
+GlobalState.prototype.GetSimSpeed = function(){ return SIM_SPEED[this.speedIdx]; };
+GlobalState.prototype.IncSpeed = function(){
+    if(this.speedIdx < SIM_SPEED.length-1) {
+        this.speedIdx++;
+        this.ui.UpdateSimSpeed(SIM_SPEED[this.speedIdx]);
+    }
+};
+GlobalState.prototype.DecSpeed = function(){ 
+    if(this.speedIdx > 0) {
+        this.speedIdx--;
+        this.ui.UpdateSimSpeed(SIM_SPEED[this.speedIdx]);
     }
 };
 
