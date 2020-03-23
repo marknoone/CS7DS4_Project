@@ -27,6 +27,7 @@ const sundaySelect      = document.querySelector('#sunday');
 
 var UIManager = function(gs){
     this.gs = gs;
+    this.map = gs.GetMapManager().GetMap();
     this.state = {
         isInfoShowing: false,
         isFilterShowing: false,
@@ -45,21 +46,23 @@ var UIManager = function(gs){
 
     shBtn.addEventListener('click', function(e) {
         thisUI.state.isPopupShowing = !thisUI.state.isPopupShowing;
-    
         thisUI.updateUI();  // TODO: Remove and place with render call
     });
     
     filterBtn.addEventListener('click', function(e) {
         thisUI.state.isFilterShowing = !thisUI.state.isFilterShowing;
-        toggleActiveBtn(filterBtn)
+        thisUI.toggleActiveBtn(filterBtn)
         thisUI.updateUI(); // TODO: Remove and place with render call
     });
     
     infoBtn.addEventListener('click', function(e) {
         thisUI.state.isInfoShowing = !thisUI.state.isInfoShowing;
-        toggleActiveBtn(infoBtn)
+        thisUI.toggleActiveBtn(infoBtn)
         thisUI.updateUI(); // TODO: Remove and place with render call
     });
+
+    zoomPlusBtn.addEventListener('click', function(e) { thisUI.map.zoomIn(); });
+    zoomMinusBtn.addEventListener('click', function(e) { thisUI.map.zoomOut(); });
 
     // Start UI
     this.updateUI();

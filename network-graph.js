@@ -84,6 +84,7 @@ var NetworkGraph = function(globalState){
         .domain([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])
         .range([thisGraph.fontDistLimits.max, thisGraph.fontDistLimits.min]);
     
+    this.map.on('zoomend', () => { thisGraph.updateGraph(); });
     // Register zoom behaviour callbacks ---------------------
     // this.svg.call(d3.zoom()
     //     .scaleExtent([thisGraph.scaleLimits.min, thisGraph.scaleLimits.max])    
@@ -229,6 +230,10 @@ NetworkGraph.prototype.updateGraph = function(){
         state = thisGraph.state,
         stops = this.gs.GetDataManager().GetStops();
 
+    // Remove all older elements
+    d3.selectAll(".link").remove();
+    d3.selectAll("."+consts.circleGClass).remove();
+
     // Generate path data with custom D3 keys...
     this.paths = this.paths.data(this.edges, function(d){
       return String(d.source.id) + "+" + String(d.target.id);
@@ -302,6 +307,7 @@ NetworkGraph.prototype.updateGraph = function(){
         .attr("r", String(thisGraph.zoomScale(thisGraph.scale)))
         .attr("stroke-width", thisGraph.nodeStrokeScale(thisGraph.scale) + "px");
     newGs.each(function(d){ thisGraph.insertNodeID(d3.select(this), d.title); });
+
     this.circles.exit().remove();
   };
 
