@@ -193,12 +193,16 @@ DataManager.prototype.CalculateStopChartData = function(cb){
         var minutes = (a.getUTCHours() * 60) + a.getUTCMinutes();
         return (minutes * 60) + a.getUTCSeconds();
     }
-    var getTimesFromKey = function(key){ 
+    var getSecondsFromKey = function(key){ 
         [arrTime, depTime] = key.split("-");
         var arrival = arrTime.split(":"), departure = depTime.split(":"); 
+        var aMinutes = (parseInt(arrival[0]) * 60) +parseInt(arrival[1]),
+            bMinutes = (parseInt(departure[0]) * 60) +parseInt(departure[1]);
+        
         return [ 
-            new Date(0, 0, 0, arrival[0], arrival[1], arrival[2], 0),
-            new Date(0, 0, 0, departure[0], departure[1], departure[2], 0)
+            parseInt(arrival[0]),
+            (aMinutes * 60) + parseInt(arrival[2]),
+            (bMinutes * 60) + parseInt(departure[2])
         ];
     }
 
@@ -208,27 +212,30 @@ DataManager.prototype.CalculateStopChartData = function(cb){
 
         // Calculate dat into results
         Object.keys(s.ArrDep).forEach(function(k){
-            [arrTime, depTime] = getTimesFromKey(k);
+            [arrHours, arrTime, depTime] = getSecondsFromKey(k);
             if(!(s.ArrDep[k] in results)) results[s.ArrDep[k]] = {}
-            if(!(arrTime.getHours() in results[s.ArrDep[k]])) 
-                results[s.ArrDep[k]][arrTime.getHours()] = {
-                    lastTime: 0, AvgWait: 0, VehicleCount: 0 };
+            if(!(arrHours in results[s.ArrDep[k]])) 
+                results[s.ArrDep[k]][arrHours] = {deps: {}, AvgWait: 0, VehicleCount: 0 };
 
-            var last = results[s.ArrDep[k]][arrTime.getHours()].lastTime;
-            var diff = getSeconds(depTime) - last;
-            results[s.ArrDep[k]][arrTime.getHours()] = {
-                lastTime: getSeconds(depTime),
-                AvgWait: results[s.ArrDep[k]][arrTime.getHours()].AvgWait + diff,
-                VehicleCount: results[s.ArrDep[k]][arrTime.getHours()].VehicleCount +1
-            }
-            if (results[s.ArrDep[k]][arrTime.getHours()].VehicleCount > maxVehicleCount)
-                maxVehicleCount = results[s.ArrDep[k]][arrTime.getHours()].VehicleCount
+            results[s.ArrDep[k]][arrHours].deps[depTime] = {};
+            if (Object.keys(results[s.ArrDep[k]][arrHours].deps).length > maxVehicleCount)
+                maxVehicleCount = Object.keys(results[s.ArrDep[k]][arrHours].deps).length;
         });
 
         // Finalize AvgWait 
-        Object.keys(results).forEach(k => Object.keys(results[k]).forEach(t => {
-            results[k][t].AvgWait = results[k][t].AvgWait / results[k][t].VehicleCount;
-            results[k][t].RouteSharePerc = results[k][t].VehicleCount / maxVehicleCount;
+        Object.keys(results).forEach((k) => Object.keys(results[k]).forEach((tKey) => {
+                var t = results[k][tKey];
+
+                var lastTime = Object.keys(t.deps)[0], diffs = [];
+                Object.keys(t.deps).forEach((depKey, i) => { 
+                    if (i === 0) return
+                    diffs.push(depKey - lastTime);
+                    lastTime = depKey;
+                })
+                var total = diffs.reduce((a, b) => a + b, 0)
+                t.VehicleCount = Object.keys(t.deps).length;
+                t.AvgWait = total / Object.keys(t.deps).length;
+                t.RouteSharePerc = t.VehicleCount / maxVehicleCount;
         }));
 
         // Place into chart data

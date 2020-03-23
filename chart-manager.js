@@ -12,6 +12,7 @@
 
 const chartHeight = 240;
 const chartWidth = 480;
+const waitUpperBound = 300;
 const CHART_TYPES = Object.freeze({
     HEATMAP:                    "8702ae7c-f3ea-4349-bfde-f4774d2b3eeb",
     CONNECTED_SCATTER_PLOT:     "af6372e8-f052-45d6-9119-e467ccd1c395",
@@ -78,7 +79,7 @@ ChartManager.prototype.AttachHeatmap = function(elemID, data){
 
     // TODO: Define colour palette with set time slots and wait times.
     var max = d3.max(reducedData,  d=> d.value );
-    var myColor = d3.scaleSequential().interpolator(d3.interpolateInferno).domain([1,max])
+    var myColor = d3.scaleSequential().interpolator(d3.interpolateOrRd).domain([60,waitUpperBound])
 
     var x = d3.scaleBand().range([0, width ]).domain(myGroups).padding(0.05);
     svg.append("g").style("fill", "#333").style("font-size", 15)

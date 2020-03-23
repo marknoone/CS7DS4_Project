@@ -20,6 +20,7 @@
 var gs = new GlobalState()
 gs.SetDataManager(new DataManager(gs));
 gs.GetDataManager().ParseGTFS("LUAS", () => {
+    console.log(gs.GetDataManager().stops[this.gs.GetActiveStopID()]);
     console.log(gs.GetDataManager().chartData[this.gs.GetActiveStopID()]);
     
     // Set up remaining managers.
