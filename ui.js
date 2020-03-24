@@ -62,11 +62,11 @@ var UIManager = function(gs){
         thisUI.updateUI();  // TODO: Remove and place with render call
     });
     
-    filterBtn.addEventListener('click', function(e) {
-        thisUI.state.isFilterShowing = !thisUI.state.isFilterShowing;
-        thisUI.toggleActiveBtn(filterBtn)
-        thisUI.updateUI(); // TODO: Remove and place with render call
-    });
+    // filterBtn.addEventListener('click', function(e) {
+    //     thisUI.state.isFilterShowing = !thisUI.state.isFilterShowing;
+    //     thisUI.toggleActiveBtn(filterBtn)
+    //     thisUI.updateUI(); // TODO: Remove and place with render call
+    // });
     
     infoBtn.addEventListener('click', function(e) {
         thisUI.state.isInfoShowing = !thisUI.state.isInfoShowing;
@@ -81,11 +81,11 @@ var UIManager = function(gs){
     rewBtn.addEventListener('click', function(e) { thisUI.gs.DecSpeed(); });
 
     // Filter toggles
-    beToggle.addEventListener('change',   (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.BUS_EIREANN));
-    dubToggle.addEventListener('change',  (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.DUBLIN_BUS));
-    irToggle.addEventListener('change',   (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.IRISH_RAIL));
-    gadToggle.addEventListener('change',  (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.GO_AHEAD));
-    luasToggle.addEventListener('change', (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.LUAS));
+    // beToggle.addEventListener('change',   (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.BUS_EIREANN));
+    // dubToggle.addEventListener('change',  (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.DUBLIN_BUS));
+    // irToggle.addEventListener('change',   (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.IRISH_RAIL));
+    // gadToggle.addEventListener('change',  (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.GO_AHEAD));
+    // luasToggle.addEventListener('change', (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.LUAS));
 
     // Start UI
     this.updateUI();
@@ -134,14 +134,14 @@ UIManager.prototype.updateUI = function() {
     else
         popup.style.bottom = "-424px";
     
-    if(this.state.isFilterShowing){
-        filterLayout.style.opacity = 1
-        setTimeout(function(){ filterLayout.style.visibility = "visible"; }, 150);
-    }
-    else {
-        filterLayout.style.opacity = 0
-        setTimeout(function(){ filterLayout.style.visibility = "hidden"; }, 150);
-    }
+    // if(this.state.isFilterShowing){
+    //     filterLayout.style.opacity = 1
+    //     setTimeout(function(){ filterLayout.style.visibility = "visible"; }, 150);
+    // }
+    // else {
+    //     filterLayout.style.opacity = 0
+    //     setTimeout(function(){ filterLayout.style.visibility = "hidden"; }, 150);
+    // }
     
     if(this.state.isInfoShowing){
         infoLayout.style.opacity = 1
@@ -180,17 +180,17 @@ UIManager.prototype.UpdatePlayPauseBtn = function(){
 }
 
 UIManager.prototype.UpdateFilters = function(){
-    var filters = this.gs.GetFilters();
-    beToggle.checked = filters.showBE;
-    dubToggle.checked = filters.showDB;
-    irToggle.checked = filters.showIR;
-    gadToggle.checked = filters.showGAD;
-    luasToggle.checked = filters.showLUAS;
+    // var filters = this.gs.GetFilters();
+    // beToggle.checked = filters.showBE;
+    // dubToggle.checked = filters.showDB;
+    // irToggle.checked = filters.showIR;
+    // gadToggle.checked = filters.showGAD;
+    // luasToggle.checked = filters.showLUAS;
 }
 
 UIManager.prototype.UpdateVehicleMetricsObj = function(obj){
     var {trainCount, busCount, tramCount} = obj;
-    busMetric.innerHTML = busCount;
-    trainMetric.innerHTML = trainCount;
+    // busMetric.innerHTML = busCount;
+    // trainMetric.innerHTML = trainCount;
     tramMetric.innerHTML = tramCount;
 }

@@ -11,15 +11,15 @@ var MapManager = function(globalState) {
         mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + this.token;
 
     var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr});
-    // streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
+    streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
 
     this.map = L.map('map', {layers: [grayscale], zoomControl: false }).setView([53.347443, -6.262138], 13);
-    // var baseLayers = {
-    //     "Grayscale": grayscale,
-    //     "Streets": streets
-    // };
+    var baseLayers = {
+        "Grayscale": grayscale,
+        "Streets": streets
+    };
 
-    // L.control.layers(baseLayers).addTo(this.map);
+    L.control.layers(baseLayers).addTo(this.map);
 
     /* Initialize the SVG layer */
     this.map._initPathRoot();

@@ -39,7 +39,7 @@ var NetworkGraph = function(globalState){
     this.fontDistLimits   = { min: minFontDist,    max: maxFontDist   }
 
     this.scale = 1
-    this.vehicleScale = 4;
+    this.vehicleScale = 5;
     this.state = {
         selectedNode: null,
         selectedEdge: null,
@@ -375,6 +375,7 @@ NetworkGraph.prototype.UpdateVehicles = function(){
             })
 
             lastDep = dep;
+            metricObj.tramCount = metricObj.tramCount + 1;
         });
     });
 

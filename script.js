@@ -23,8 +23,8 @@ gs.GetDataManager().ParseGTFS("LUAS", () => {
     // Set up remaining managers.
     gs.SetChartManager(new ChartManager(gs));
     gs.SetMapManager(new MapManager(gs));
-    gs.SetNetworkGraph(new NetworkGraph(gs));
     gs.SetUI(new UIManager(gs));
+    gs.SetNetworkGraph(new NetworkGraph(gs));
     
     // Begin simulation
     gs.Update();

@@ -24,7 +24,7 @@ var GlobalState = function(){
     this.time = new Date().getTime(),
     
     // TODO: variable sim time
-    this.simTime = new Date(2020, 03, 21, 11, 00, 00, 00),
+    this.simTime = new Date(2020, 03, 21, 16, 30, 00, 00),
     this.speedIdx = 4;
     this.busCount = 0;
     this.trainCount = 0;
