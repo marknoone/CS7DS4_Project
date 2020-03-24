@@ -177,14 +177,14 @@ DataManager.prototype.ParseGTFS = async function(op, cb){
             
             // Check Standard Schedule
             var isOperating = false;
-            switch (d.getUTCDay()) {
-            case 0: isOperating = cd.sunday;    break;
-            case 1: isOperating = cd.monday;    break;
-            case 2: isOperating = cd.tuesday;   break;
-            case 3: isOperating = cd.wednesday; break;
-            case 4: isOperating = cd.thursday;  break;
-            case 5: isOperating = cd.friday;    break;
-            case 6: isOperating = cd.saturday;  break;
+            switch (d.getDay()) {
+            case 0: isOperating = cd.sunday    == 1; break;
+            case 1: isOperating = cd.monday    == 1; break;
+            case 2: isOperating = cd.tuesday   == 1; break;
+            case 3: isOperating = cd.wednesday == 1; break;
+            case 4: isOperating = cd.thursday  == 1; break;
+            case 5: isOperating = cd.friday    == 1; break;
+            case 6: isOperating = cd.saturday  == 1; break;
             }
             
             // Add to map if operating

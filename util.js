@@ -42,23 +42,24 @@ const util = {
             day   = gtfsStringDate.slice(6, 8);
         return new Date(parseInt(year), parseInt(month), parseInt(day));
     },
-    GetGTFSTime: function(gtfsStringDate){
-        var year  = gtfsStringDate.slice(0, 4),
-            month = gtfsStringDate.slice(4, 6),
-            day   = gtfsStringDate.slice(6, 8);
-        return [parseInt(year), parseInt(month), parseInt(day)];
+    GetGTFSTime: function(gtfsStringTime){
+        var [h, m, s] = gtfsStringTime.split(":");
+        return [parseInt(h), parseInt(m), parseInt(s)];
     },
-    ToGTFSDate: function(date){return "" + date.getFullYear() + date.getMonth() + date.getDate()},
-    IsDateBetweenGTFSDatesMin: function(date, gtfsDate1, gtfsDate2) {
-        var g1 = this.GetGTFSTime(gtfsDate1),
-            g2 = this.GetGTFSTime(gtfsDate2);
+    ToGTFSDate: function(d){
+        var month = d.getMonth() < 10? "0"+d.getMonth():d.getMonth();
+        var date  = d.getDate() < 10? "0"+d.getDate():d.getDate();
+        return "" + d.getFullYear() + month + date},
+    IsTimeBetweenGTFSTimesMin: function(date, gtfsTime1, gtfsTime2) {
+        var g1 = this.GetGTFSTime(gtfsTime1),
+            g2 = this.GetGTFSTime(gtfsTime2);
         var dateSec = this.GetSecondsFromDate(date);
         return this.GetSecondsFromArr(g1) <= dateSec && dateSec < this.GetSecondsFromArr(g2); 
     },
     IsDateBetweenGTFSDates: function(date, gtfsDate1, gtfsDate2){
         var g1 = this.ParseGTFSDate(gtfsDate1).getTime(),
         g2 = this.ParseGTFSDate(gtfsDate2).getTime();
-        return g1[0] <= date.getHours() && date.getHours() < g2;
+        return g1 <= date.getTime() && date.getTime() < g2;
     },
     PointBetweenPerc: function(points, perc){
         return {

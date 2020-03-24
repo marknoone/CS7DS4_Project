@@ -39,7 +39,7 @@ var NetworkGraph = function(globalState){
     this.fontDistLimits   = { min: minFontDist,    max: maxFontDist   }
 
     this.scale = 1
-    this.vehicleScale = 0.6;
+    this.vehicleScale = 4;
     this.state = {
         selectedNode: null,
         selectedEdge: null,
@@ -336,10 +336,10 @@ NetworkGraph.prototype.UpdateVehicles = function(){
         console.error("No Vehicle Services Found...")
         return;
     }
-    var activeServices = services[util.ToGTFSDate(simTime)]
-    console.log(activeServices);
+
+    var activeServices = services[util.ToGTFSDate(simTime)].map(d => { return d.split(":")[1]});
     Object.keys(this.stopTimes).forEach(function(key) {
-        if(!util.IsDateBetweenGTFSDatesMin(
+        if(!util.IsTimeBetweenGTFSTimesMin(
             simTime, thisGraph.stopTimes[key].startTime, thisGraph.stopTimes[key].endTime))
                 return
 
@@ -352,7 +352,7 @@ NetworkGraph.prototype.UpdateVehicles = function(){
 
             [arr, dep] = tKey.split("-");
             if(lastDep === "") { lastDep = dep; lastDepID = stopTime[tKey].StopID; return } 
-            if(!util.IsDateBetweenGTFSDatesMin(simTime, lastDep, arr)){
+            if(!util.IsTimeBetweenGTFSTimesMin(simTime, lastDep, arr)){
                 lastDep = dep; lastDepID = stopTime[tKey].StopID; return }
 
             var stop1 = stops[lastDepID];
@@ -360,7 +360,7 @@ NetworkGraph.prototype.UpdateVehicles = function(){
             var lastDepSecs = util.GetSecondsFromArr(util.GetGTFSTime(lastDep)),
                 arrSecs = util.GetSecondsFromArr(util.GetGTFSTime(arr)),
                 simSecs = util.GetSecondsFromDate(simTime);
-            var timePerc = (simSecs + lastDepSecs) / (arrSecs + lastDepSecs)
+            var timePerc = (simSecs - lastDepSecs) / (arrSecs - lastDepSecs)
 
             // Interpolate position
             var p = util.PointBetweenPerc({lat1:stop1.LatLng.Lat, lng1:stop1.LatLng.Lng, 
@@ -373,10 +373,10 @@ NetworkGraph.prototype.UpdateVehicles = function(){
                 latLng: vLoc,
                 operator: tagMap[tag]
             })
+
+            lastDep = dep;
         });
     });
-
-    console.log(vehicles);
 
     // Remove all older elements
     d3.selectAll(".vehicle").remove();
@@ -386,7 +386,7 @@ NetworkGraph.prototype.UpdateVehicles = function(){
             thisGraph.map.latLngToLayerPoint(d.latLng).x +","+ 
             thisGraph.map.latLngToLayerPoint(d.latLng).y +")";
     })
-    .attr("fill", function(d){ return opColours[d.operator]? opColours[d.operator] : "#333"});
+    .attr("fill", "#ee5253");
 
     var newGs= this.activeVehicles.enter().append("g");
     newGs.classed("vehicle", true)
@@ -395,15 +395,15 @@ NetworkGraph.prototype.UpdateVehicles = function(){
                 thisGraph.map.latLngToLayerPoint(d.latLng).x +","+ 
                 thisGraph.map.latLngToLayerPoint(d.latLng).y +")";
         })
-       .attr("fill", function(d){ return opColours[d.operator]? opColours[d.operator] : "#333"})
+        .attr("fill", "#ee5253")
       .on("mouseover", function(d){ /* Adjust CSS classes */ })
       .on("mouseout", function(d){ /* Adjust CSS classes */})
       .on("mousedown", function(d){ /* De-register selected node */})
       .on("mouseup", function(d){ /* Register selected node */ });
 
     newGs.append("circle")
-        .attr("r", String(thisGraph.zoomScale(thisGraph.vehicleScale)))
-        .attr("fill", function(d){ return opColours[d.operator]? opColours[d.operator] : "#333"});
+        .attr("r", String(thisGraph.vehicleScale))
+        .attr("fill", "#ee5253");
 
     this.activeVehicles.exit().remove();
     this.gs.SetVehicleMetrics(metricObj);
