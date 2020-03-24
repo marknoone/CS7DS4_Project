@@ -11,7 +11,12 @@ const simClock = document.querySelector('#simClock');
 const simSpeed = document.querySelector('#simSpeed');
 const popup = document.getElementsByClassName('popup-layout')[0];
 
-// Speed controls
+// Vehicle Metrics
+const busMetric   = document.querySelector('#busMetric');
+const trainMetric = document.querySelector('#trainMetric');
+const tramMetric  = document.querySelector('#tramMetric');
+
+// Speed Controls
 const ffBtn = document.querySelector('#ffBtn');
 const playPauseBtn = document.querySelector('#playPauseBtn');
 const rewBtn = document.querySelector('#rewBtn');
@@ -75,12 +80,20 @@ var UIManager = function(gs){
     playPauseBtn.addEventListener('click', function(e) { thisUI.gs.TogglePause(); });
     rewBtn.addEventListener('click', function(e) { thisUI.gs.DecSpeed(); });
 
+    // Filter toggles
+    beToggle.addEventListener('change',   (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.BUS_EIREANN));
+    dubToggle.addEventListener('change',  (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.DUBLIN_BUS));
+    irToggle.addEventListener('change',   (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.IRISH_RAIL));
+    gadToggle.addEventListener('change',  (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.GO_AHEAD));
+    luasToggle.addEventListener('change', (event) => thisUI.gs.SetFilter(event.target.checked, FILTER_OPTIONS.LUAS));
+
     // Start UI
     this.updateUI();
     this.UpdateClock();
     this.UpdateSimClock();
     this.UpdateSimSpeed();
     this.UpdatePlayPauseBtn();
+    this.UpdateFilters();
 };
 
 UIManager.prototype.toggleActiveBtn = function(el){
@@ -99,6 +112,7 @@ UIManager.prototype.toggleToggle = function(el){
     }
 }
 
+// Deprecated: Needs cleanup
 UIManager.prototype.updateUI = function() {
     // Change button icon
     if (this.state.isPopupShowing) {
@@ -159,7 +173,24 @@ UIManager.prototype.UpdateSimSpeed = function(){
     var speed = this.gs.GetSimSpeed();
     simSpeed.innerHTML = speed;
 }
+
 UIManager.prototype.UpdatePlayPauseBtn = function(){
     var isPaused = this.gs.GetIsPaused()
     playPauseBtn.innerHTML = isPaused? '<i class="fas fa-lg fa-play">':'<i class="fas fa-lg fa-pause">'
+}
+
+UIManager.prototype.UpdateFilters = function(){
+    var filters = this.gs.GetFilters();
+    beToggle.checked = filters.showBE;
+    dubToggle.checked = filters.showDB;
+    irToggle.checked = filters.showIR;
+    gadToggle.checked = filters.showGAD;
+    luasToggle.checked = filters.showLUAS;
+}
+
+UIManager.prototype.UpdateVehicleMetricsObj = function(obj){
+    var {trainCount, busCount, tramCount} = obj;
+    busMetric.innerHTML = busCount;
+    trainMetric.innerHTML = trainCount;
+    tramMetric.innerHTML = tramCount;
 }

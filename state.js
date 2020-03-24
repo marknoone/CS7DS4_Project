@@ -28,10 +28,10 @@ var GlobalState = function(){
     this.trainCount = 0;
     this.tramCount = 0;
     this.filters = {
-        showBE:   true,
-        showIR:   true,
-        showDB:   true,
-        showGAD:  true,
+        showBE:   false,
+        showIR:   false,
+        showDB:   false,
+        showGAD:  false,
         showLUAS: true
     }
 };
@@ -52,14 +52,11 @@ GlobalState.prototype.Update = function(){
         return;
     }
     
-    // 1. Calculate new time..
-    console.log(speedMS);
     this.time = curr;
     this.simTime.setTime(this.simTime.getTime() + (1000 * Math.sign(SIM_SPEED[this.speedIdx]) ));
     this.ui.UpdateSimClock(); // Keep clock up do date.
 
     // 2. Fetch data for time..
-    // 3. Push time to UI..
     // 4. Push time to graph..
     // this.networkGraph.updateGraph();
     this.simTimeout = setTimeout((function(){ this.Update(); }).bind(this), 34);
@@ -121,28 +118,14 @@ GlobalState.prototype.DecSpeed = function(){
     }
 };
 
-GlobalState.prototype.GetTrains = function(){ return this.trainCount; };
-GlobalState.prototype.SetTrains = function(trainCount){ 
-    if (trainCount !== null) {
-        this.trainCount = trainCount;
-        this.ui.UpdateTrainCount(this.trainCount);
-    }
-};
-
-GlobalState.prototype.GetTrams = function(){ return this.tramCount; };
-GlobalState.prototype.SetTrams = function(tramCount){ 
-    if (tramCount !== null) {
-        this.tramCount = tramCount;
-        this.ui.UpdateTramCount(this.tramCount);
-    }
-};
-
-GlobalState.prototype.GetBuses = function(){ return this.busCount; };
-GlobalState.prototype.SetBuses = function(busCount){ 
-    if (busCount !== null) {
-        this.busCount = busCount;
-        this.ui.UpdateBusCount(this.busCount);
-    }
+GlobalState.prototype.GetVehicleMetrics = function(){ 
+    return {trainCount: this.trainCount, busCount: this.busCount, tramCount: this.tramCount}; };
+GlobalState.prototype.SetVehicleMetrics = function(obj){ 
+    var {trainCount, busCount, tramCount} = obj;
+    if (trainCount !== null) { this.trainCount = trainCount; }
+    if (busCount !== null)   { this.busCount = busCount; }
+    if (tramCount !== null)  { this.tramCount = tramCount; }
+    this.ui.UpdateVehicleMetricsObj(obj);
 };
 
 GlobalState.prototype.GetIsLoading = function(){ return this.isLoading; };
@@ -160,7 +143,8 @@ GlobalState.prototype.SetActiveStopID = function(activeStopID){
 };
 
 GlobalState.prototype.GetFilters = function(){ return this.filters; };
-GlobalState.prototype.SetFilters = function(filter, value){ 
+GlobalState.prototype.SetFilter = function(value, filter){ 
+    console.log(value);
     switch(filter){
         case FILTER_OPTIONS.BUS_EIREANN:
             this.filters.showBE = value; break;
@@ -175,5 +159,5 @@ GlobalState.prototype.SetFilters = function(filter, value){
         default:
     }
     
-    this.networkGraph.UpdateFilters(this.filters);
+    this.networkGraph.UpdateFilters();
 };

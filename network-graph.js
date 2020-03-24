@@ -27,7 +27,8 @@ var NetworkGraph = function(globalState){
     this.nodes    = [];
     this.edges    = [];
     this.vehicles = [];
-    this.map     = globalState.GetMapManager().GetMap();
+    this.map      = globalState.GetMapManager().GetMap();
+
     this.latLimits        = { min: minLat,         max: maxLat        }
     this.lngLimits        = { min: minLng,         max: maxLng        }
     this.fontLimits       = { min: minFont,        max: maxFont       }
@@ -225,6 +226,7 @@ NetworkGraph.prototype.buildGraph = function(){
 
     // Add vehicles
     var tripData = this.gs.GetDataManager().GetStopTimeTrips(), thisGraph = this;
+    
 };
 
 // Update -------------------------------------------------
@@ -319,7 +321,8 @@ NetworkGraph.prototype.updateVehicles = function(){
     var thisGraph = this, 
         consts = thisGraph.consts, 
         state = thisGraph.state,
-        stops = this.gs.GetDataManager().GetStops();
+        stops = this.gs.GetDataManager().GetStops(),
+        metricObj = {busCount: 0, trainCount: 0, tramCount: 0};
 
     // Remove all older elements
     d3.selectAll(".vehicle").remove();
@@ -350,6 +353,7 @@ NetworkGraph.prototype.updateVehicles = function(){
         .attr("fill", function(d){ return opColours[d.operator]? opColours[d.operator] : "#333"});
 
     this.activeVehicles.exit().remove();
+    this.gs.SetVehicleMetrics(metricObj);
 }
 
 NetworkGraph.prototype.updateScales = function(){
@@ -371,6 +375,12 @@ NetworkGraph.prototype.updateScales = function(){
 
     this.evaluateCollisions.call(this);
 };
+
+NetworkGraph.prototype.UpdateFilters = function() {
+    var filters = this.gs.GetFilters();
+    console.log(filters);
+    // On filter change...
+}
 
 NetworkGraph.prototype.evaluateCollisions = function(){
     var edges = this.edges;
