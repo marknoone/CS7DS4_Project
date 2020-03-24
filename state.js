@@ -22,7 +22,9 @@ var GlobalState = function(){
     this.isLoading = true; // TODO: Loading screen
     this.isPaused = true;
     this.time = new Date().getTime(),
-    this.simTime = new Date(),
+    
+    // TODO: variable sim time
+    this.simTime = new Date(2020, 03, 21, 11, 00, 00, 00),
     this.speedIdx = 4;
     this.busCount = 0;
     this.trainCount = 0;
@@ -55,10 +57,7 @@ GlobalState.prototype.Update = function(){
     this.time = curr;
     this.simTime.setTime(this.simTime.getTime() + (1000 * Math.sign(SIM_SPEED[this.speedIdx]) ));
     this.ui.UpdateSimClock(); // Keep clock up do date.
-
-    // 2. Fetch data for time..
-    // 4. Push time to graph..
-    // this.networkGraph.updateGraph();
+    this.networkGraph.UpdateVehicles();
     this.simTimeout = setTimeout((function(){ this.Update(); }).bind(this), 34);
 }
 
@@ -125,7 +124,7 @@ GlobalState.prototype.SetVehicleMetrics = function(obj){
     if (trainCount !== null) { this.trainCount = trainCount; }
     if (busCount !== null)   { this.busCount = busCount; }
     if (tramCount !== null)  { this.tramCount = tramCount; }
-    this.ui.UpdateVehicleMetricsObj(obj);
+    if (this.ui) this.ui.UpdateVehicleMetricsObj(obj);
 };
 
 GlobalState.prototype.GetIsLoading = function(){ return this.isLoading; };

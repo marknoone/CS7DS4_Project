@@ -142,7 +142,7 @@ ChartManager.prototype.AttachConnectedScatterPlot = function(elemID, data){
     var max = d3.max(data,  d=> d3.max(d.values, (d) => d.value));
 
     // Add X axis
-    var x = d3.scaleLinear().domain([0,23]).range([ 0, width ]);
+    var x = d3.scaleLinear().domain([0,24]).range([ 0, width ]);
     var xAxis = d3.axisBottom().scale(x);
     xAxis.ticks(24);
     svg.append("g").attr("transform", "translate(0," + height + ")").call(xAxis);

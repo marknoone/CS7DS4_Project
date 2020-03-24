@@ -6,13 +6,22 @@ const TRANSIT_TYPE = Object.freeze({
 });
 
 // Filepaths for GTFS files
-const  opInfo = {
+const opInfo = {
     "LUAS": { path: "assets/gtfs/luas/",        tag:"luas",         mode: TRANSIT_TYPE.TRAM },
     "GAD":  { path: "assets/gtfs/goahead/",     tag:"goahead",      mode: TRANSIT_TYPE.BUS},
     "DUB":  { path: "assets/gtfs/dublinbus/",   tag:"dublinbus",    mode: TRANSIT_TYPE.BUS},
     "IR":   { path: "assets/gtfs/irishrail/",   tag:"irishrail",    mode: TRANSIT_TYPE.TRAIN},
     "BE":   { path: "assets/gtfs/buseireann/",  tag:"buseireann",   mode: TRANSIT_TYPE.BUS},
 };
+
+// TODO: Remove to stop maintaining two consts, Key above should be tag
+const tagMap = {
+    "luas":       { op: "LUAS",     tag:"luas",         mode: TRANSIT_TYPE.TRAM  },      
+    "goahead":    { op: "GAD",      tag:"goahead",      mode: TRANSIT_TYPE.BUS   },   
+    "dublinbus":  { op: "DUB",      tag:"dublinbus",    mode: TRANSIT_TYPE.BUS   }, 
+    "irishrail":  { op: "IR",       tag:"irishrail",    mode: TRANSIT_TYPE.TRAIN }, 
+    "buseireann": { op: "BE",       tag:"buseireann",   mode: TRANSIT_TYPE.BUS   },
+}
 
 // Optional route colours
 const colours = ["#EDC951","#CC333F","#00A0B0"];
@@ -56,6 +65,15 @@ DataManager.prototype.GetRoute  = function(ID){
     return this.routeMap[ID];
 }
 
+DataManager.prototype.GetTrips = function(){ return this.tripMap; }
+DataManager.prototype.GetTrip  = function(ID){
+    if (this.tripMap == null) {
+        console.error("GTFS not yet parsed.");
+        return null;
+    }
+    return this.tripMap[ID];
+}
+
 DataManager.prototype.GetStopTimeTrips = function(){ return this.stopTimeTrips; }
 DataManager.prototype.GetStopTimeTrip  = function(ID){
     if (this.stopTimeTrips == null) {
@@ -96,7 +114,7 @@ DataManager.prototype.ParseGTFS = async function(op, cb){
     stopData.forEach(function(s){ 
         thisDM.stops[(opInfo[key].tag + ":" + s.stop_id)] = {
             // Information for nodes
-            ID: s.stop_id,
+            ID: (opInfo[key].tag + ":" + s.stop_id),
             Name: s.stop_name,
             LatLng: {Lat: s.stop_lat, Lng: s.stop_lon},
             
@@ -115,8 +133,8 @@ DataManager.prototype.ParseGTFS = async function(op, cb){
             thisDM.stopTimeTrips[(opInfo[key].tag + ":" + st.trip_id)] = {startTime: st.arrival_time}; 
         
         thisDM.stopTimeTrips[(opInfo[key].tag + ":" + st.trip_id)].endTime = st.departure_time; 
-        thisDM.stopTimeTrips[(opInfo[key].tag + ":" + st.trip_id)][st.stop_sequence] = {
-            arrTime: st.arrival_time, depTime: st.departure_time, stopID: st.stop_id};
+        thisDM.stopTimeTrips[(opInfo[key].tag + ":" + st.trip_id)][(st.arrival_time+"-"+st.departure_time)] =  {
+            StopID:(opInfo[key].tag + ":" + st.stop_id), Seq: st.stop_sequence};
             
         // Keep track of all stop departures (for chart data)
         var route = thisDM.tripMap[(opInfo[key].tag + ":" + st.trip_id)].route_id;
@@ -153,7 +171,7 @@ DataManager.prototype.ParseGTFS = async function(op, cb){
             // Check if between specified dates & Calendar Date excpetions
             if (!util.IsDateBetweenGTFSDates(d, cd.start_date, cd.end_date)) {
                 if (util.GetCalendarDateOperation(calenderDateData, cd.service_id, d) === 1)                       
-                thisDM.services[util.ToGTFSDate(d)].push((opInfo[key].tag + ":" + cd.service_id))
+                    thisDM.services[util.ToGTFSDate(d)].push((opInfo[key].tag + ":" + cd.service_id))
                 return;
             }
             
@@ -189,10 +207,6 @@ DataManager.prototype.CalculateStopChartData = function(cb){
         return
     }
 
-    var getSeconds = function(a){ 
-        var minutes = (a.getUTCHours() * 60) + a.getUTCMinutes();
-        return (minutes * 60) + a.getUTCSeconds();
-    }
     var getSecondsFromKey = function(key){ 
         [arrTime, depTime] = key.split("-");
         var arrival = arrTime.split(":"), departure = depTime.split(":"); 

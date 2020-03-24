@@ -23,11 +23,11 @@ const opColours = {
 // ----------------------- Constructor ------------------------
 // ------------------------------------------------------------
 var NetworkGraph = function(globalState){
-    this.gs       = globalState;
-    this.nodes    = [];
-    this.edges    = [];
-    this.vehicles = [];
-    this.map      = globalState.GetMapManager().GetMap();
+    this.gs        = globalState;
+    this.nodes     = [];
+    this.edges     = [];
+    this.stopTimes = {};
+    this.map       = globalState.GetMapManager().GetMap();
 
     this.latLimits        = { min: minLat,         max: maxLat        }
     this.lngLimits        = { min: minLng,         max: maxLng        }
@@ -39,6 +39,7 @@ var NetworkGraph = function(globalState){
     this.fontDistLimits   = { min: minFontDist,    max: maxFontDist   }
 
     this.scale = 1
+    this.vehicleScale = 0.6;
     this.state = {
         selectedNode: null,
         selectedEdge: null,
@@ -55,6 +56,7 @@ var NetworkGraph = function(globalState){
     
     this.paths = svgG.append("g").selectAll("g"); // Path subgraph
     this.circles = svgG.append("g").selectAll("g"); // Edge subgraph
+    this.activeVehicles = svgG.append("g").selectAll("g"); // Vehicle subgraph
 
     // Set coordinate scales ---------------------------------
     var thisGraph = this;
@@ -224,17 +226,16 @@ NetworkGraph.prototype.buildGraph = function(){
         });
     })
 
-    // Add vehicles
-    var tripData = this.gs.GetDataManager().GetStopTimeTrips(), thisGraph = this;
-    
+    // Add vehicle trips
+    this.stopTimes = this.gs.GetDataManager().GetStopTimeTrips(), thisGraph = this;
+    this.updateGraph();
 };
 
 // Update -------------------------------------------------
 NetworkGraph.prototype.updateGraph = function(){
     var thisGraph = this, 
         consts = thisGraph.consts, 
-        state = thisGraph.state,
-        stops = this.gs.GetDataManager().GetStops();
+        state = thisGraph.state;
 
     // Remove all older elements
     d3.selectAll(".link").remove();
@@ -315,19 +316,71 @@ NetworkGraph.prototype.updateGraph = function(){
     newGs.each(function(d){ thisGraph.insertNodeID(d3.select(this), d.title); });
 
     this.circles.exit().remove();
+    this.UpdateVehicles();
   };
 
-NetworkGraph.prototype.updateVehicles = function(){
+NetworkGraph.prototype.UpdateVehicles = function(){
     var thisGraph = this, 
-        consts = thisGraph.consts, 
-        state = thisGraph.state,
+        simTime = this.gs.GetSimTime(),
+        vehicles = [],
+        services = this.gs.GetDataManager().GetServices(),
         stops = this.gs.GetDataManager().GetStops(),
-        metricObj = {busCount: 0, trainCount: 0, tramCount: 0};
+        trips = this.gs.GetDataManager().GetTrips(),
+        metricObj = {
+            busCount: 0, 
+            trainCount: 0, 
+            tramCount: 0
+    };
+
+    if (!(util.ToGTFSDate(simTime) in services)){
+        console.error("No Vehicle Services Found...")
+        return;
+    }
+    var activeServices = services[util.ToGTFSDate(simTime)]
+    console.log(activeServices);
+    Object.keys(this.stopTimes).forEach(function(key) {
+        if(!util.IsDateBetweenGTFSDatesMin(
+            simTime, thisGraph.stopTimes[key].startTime, thisGraph.stopTimes[key].endTime))
+                return
+
+        var stopTime = thisGraph.stopTimes[key], lastDep = "", lastDepID = "";
+        var [tag, tripID] = key.split(":")
+        if (!activeServices.includes(trips[key].service_id)) return;
+
+        Object.keys(stopTime).forEach(function(tKey){
+            if (tKey === "startTime" || tKey == "endTime") return
+
+            [arr, dep] = tKey.split("-");
+            if(lastDep === "") { lastDep = dep; lastDepID = stopTime[tKey].StopID; return } 
+            if(!util.IsDateBetweenGTFSDatesMin(simTime, lastDep, arr)){
+                lastDep = dep; lastDepID = stopTime[tKey].StopID; return }
+
+            var stop1 = stops[lastDepID];
+            var stop2 = stops[stopTime[tKey].StopID];
+            var lastDepSecs = util.GetSecondsFromArr(util.GetGTFSTime(lastDep)),
+                arrSecs = util.GetSecondsFromArr(util.GetGTFSTime(arr)),
+                simSecs = util.GetSecondsFromDate(simTime);
+            var timePerc = (simSecs + lastDepSecs) / (arrSecs + lastDepSecs)
+
+            // Interpolate position
+            var p = util.PointBetweenPerc({lat1:stop1.LatLng.Lat, lng1:stop1.LatLng.Lng, 
+                lat2: stop2.LatLng.Lat, lng2: stop2.LatLng.Lng}, timePerc);
+
+            try{ vLoc = new L.LatLng(p.lat, p.lng);} 
+            catch(err) { console.log('error', err) }
+            vehicles.push({
+                id: key + "-" + tKey,
+                latLng: vLoc,
+                operator: tagMap[tag]
+            })
+        });
+    });
+
+    console.log(vehicles);
 
     // Remove all older elements
     d3.selectAll(".vehicle").remove();
-
-    this.activeVehicles = this.activeVehicles.data(this.vehicles, function(d){ return d.id;});
+    this.activeVehicles = this.activeVehicles.data(vehicles, function(d){ return d.id;});
     this.activeVehicles.attr("transform", function(d) { 
         return "translate("+ 
             thisGraph.map.latLngToLayerPoint(d.latLng).x +","+ 
@@ -349,7 +402,7 @@ NetworkGraph.prototype.updateVehicles = function(){
       .on("mouseup", function(d){ /* Register selected node */ });
 
     newGs.append("circle")
-        .attr("r", String(thisGraph.zoomScale(thisGraph.scale)))
+        .attr("r", String(thisGraph.zoomScale(thisGraph.vehicleScale)))
         .attr("fill", function(d){ return opColours[d.operator]? opColours[d.operator] : "#333"});
 
     this.activeVehicles.exit().remove();

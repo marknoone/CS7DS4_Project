@@ -27,6 +27,14 @@ const util = {
         })
         return -1
     },
+    GetSecondsFromDate: function(a){ 
+        var minutes = (a.getHours() * 60) + a.getMinutes();
+        return (minutes * 60) + a.getSeconds();
+    },
+    GetSecondsFromArr: function(a){ 
+        var minutes = (a[0] * 60) + a[1];
+        return (minutes * 60) +  a[2];
+    },
     GetOrigID: function(s){ return s.split(":")[1]},
     ParseGTFSDate: function(gtfsStringDate){
         var year  = gtfsStringDate.slice(0, 4),
@@ -34,11 +42,29 @@ const util = {
             day   = gtfsStringDate.slice(6, 8);
         return new Date(parseInt(year), parseInt(month), parseInt(day));
     },
+    GetGTFSTime: function(gtfsStringDate){
+        var year  = gtfsStringDate.slice(0, 4),
+            month = gtfsStringDate.slice(4, 6),
+            day   = gtfsStringDate.slice(6, 8);
+        return [parseInt(year), parseInt(month), parseInt(day)];
+    },
     ToGTFSDate: function(date){return "" + date.getFullYear() + date.getMonth() + date.getDate()},
-    IsDateBetweenGTFSDates: function(date, gtfsDate1, gtfsDate2) {
+    IsDateBetweenGTFSDatesMin: function(date, gtfsDate1, gtfsDate2) {
+        var g1 = this.GetGTFSTime(gtfsDate1),
+            g2 = this.GetGTFSTime(gtfsDate2);
+        var dateSec = this.GetSecondsFromDate(date);
+        return this.GetSecondsFromArr(g1) <= dateSec && dateSec < this.GetSecondsFromArr(g2); 
+    },
+    IsDateBetweenGTFSDates: function(date, gtfsDate1, gtfsDate2){
         var g1 = this.ParseGTFSDate(gtfsDate1).getTime(),
-            g2 = this.ParseGTFSDate(gtfsDate2).getTime();
-        return g1 <= date.getTime() && date.getTime() < g2; 
+        g2 = this.ParseGTFSDate(gtfsDate2).getTime();
+        return g1[0] <= date.getHours() && date.getHours() < g2;
+    },
+    PointBetweenPerc: function(points, perc){
+        return {
+            lat: parseFloat(points.lat1) + perc * (parseFloat(points.lat2) - parseFloat(points.lat1)),
+            lng: parseFloat(points.lng1) + perc * (parseFloat(points.lng2) - parseFloat(points.lng1))
+        }
     },
     WrapRadar: function(text, width) {
         text.each(function() {
