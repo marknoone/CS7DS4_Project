@@ -208,8 +208,8 @@ NetworkGraph.prototype.buildGraph = function(){
         catch(err) { console.log('error', err) }
 
         thisGraph.nodes.push({
-            title: stop.stop_name, 
-            id: stop.stop_id,
+            title: stop.Name, 
+            id: stop.ID,
             latLng: loc, 
             operator: "LUAS",
         })
@@ -308,7 +308,7 @@ NetworkGraph.prototype.updateGraph = function(){
       .on("mouseover", function(d){ /* Adjust CSS classes */ })
       .on("mouseout", function(d){ /* Adjust CSS classes */})
       .on("mousedown", function(d){ /* De-register selected node */})
-      .on("mouseup", function(d){ /* Register selected node */ });
+      .on("mouseup", function(d){ thisGraph.gs.SetActiveStopID(d.id) });
 
     newGs.append("circle")
         .attr("r", String(thisGraph.zoomScale(thisGraph.scale)))

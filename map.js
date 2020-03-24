@@ -1,6 +1,7 @@
 var MapManager = function(globalState) {
     this.gs = globalState;
     this.map = {};
+    var thisMap = this;
     // --------------------------------------- REPLACE WITH YOUR OWN TOKEN!!!------------------------------------------
     /**/ this.token = "pk.eyJ1IjoibW5vb25lOTYiLCJhIjoiY2s4MGZjZ202MDB6MjNmbXh3eWNnYTlkaCJ9.tmdycTjo3Z40bwpTw3Xpgw"; /**/ 
     // ----------------------------------------------------------------------------------------------------------------

@@ -22,6 +22,7 @@ var GlobalState = function(){
     this.isLoading = true; // TODO: Loading screen
     this.isPaused = true;
     this.time = new Date().getTime(),
+    this.activeChartDay = 1;
     
     // TODO: variable sim time
     this.simTime = new Date(2020, 03, 21, 16, 30, 00, 00),
@@ -127,6 +128,13 @@ GlobalState.prototype.SetVehicleMetrics = function(obj){
     if (this.ui) this.ui.UpdateVehicleMetricsObj(obj);
 };
 
+GlobalState.prototype.GetActiveChartDay = function(){ return this.activeChartDay; };
+GlobalState.prototype.SetActiveChartDay = function(day){ 
+    if (day !== null) {
+        this.activeChartDay = day;
+    }
+};
+
 GlobalState.prototype.GetIsLoading = function(){ return this.isLoading; };
 GlobalState.prototype.SetIsLoading = function(isLoading){ 
     if (isLoading !== null) {
@@ -139,6 +147,8 @@ GlobalState.prototype.SetActiveStopID = function(activeStopID){
     if (activeStopID !== "" || activeStopID !== null) {
         this.activeStopID = activeStopID;
     }
+    this.chartManager.UpdateCharts();
+    this.ui.UpdateActiveStopLabel();
 };
 
 GlobalState.prototype.GetFilters = function(){ return this.filters; };

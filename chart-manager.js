@@ -30,28 +30,32 @@ var ChartManager = function (globalState) {
     this.radarChart             = null;
     this.stackedBarChart        = null;
 
-    this.AddChartToElem({elemID: "#heatChart",          type: CHART_TYPES.HEATMAP});
-    this.AddChartToElem({elemID: "#vehicleActivity",    type: CHART_TYPES.CONNECTED_SCATTER_PLOT});
-    this.AddChartToElem({elemID: "#routeShare",         type: CHART_TYPES.RADAR});
+    this.AddChartToElem(CHART_TYPES.HEATMAP);
+    this.AddChartToElem(CHART_TYPES.CONNECTED_SCATTER_PLOT);
+    this.AddChartToElem(CHART_TYPES.RADAR);
 }
 
-ChartManager.prototype.UpdateChart = function(chartUpdateReq){
-    d3.select(chartUpdateReq.elemID).remove()
-    this.AddChartToElem(chartUpdateReq)
+// TODO
+ChartManager.prototype.UpdateCharts = function(){
+    d3.select(".heatmapSvg").remove();
+    d3.select(".connectedScatterSvg").remove();
+    d3.select(".radarSvg").remove();
+    this.AddChartToElem(CHART_TYPES.HEATMAP);
+    this.AddChartToElem(CHART_TYPES.CONNECTED_SCATTER_PLOT);
+    this.AddChartToElem(CHART_TYPES.RADAR);
 }
 
-ChartManager.prototype.AddChartToElem = function(chartReq){
+ChartManager.prototype.AddChartToElem = function(type){
     var data = this.dm.GetStopChart(this.gs.GetActiveStopID());
-    
-    switch(chartReq.type){
+    switch(type){
         case CHART_TYPES.HEATMAP:
-            return this.AttachHeatmap(chartReq.elemID, data.Heatmap);
+            return this.AttachHeatmap( "#heatChart", data.Heatmap);
         case CHART_TYPES.CONNECTED_SCATTER_PLOT:
-            return this.AttachConnectedScatterPlot(chartReq.elemID, data.ConnectedScatterPlot);
+            return this.AttachConnectedScatterPlot("#vehicleActivity", data.ConnectedScatterPlot);
         case CHART_TYPES.RADAR:
-            return this.AttachRadar(chartReq.elemID, data.RadarChart);
-        case CHART_TYPES.STACKED_BAR_CHART:
-            return this.AttachStackedBarChart(chartReq.elemID, data.StackedBarChart);
+            return this.AttachRadar("#routeShare", data.RadarChart);
+        // case CHART_TYPES.STACKED_BAR_CHART:
+        //     return this.AttachStackedBarChart(chartReq.elemID, data.StackedBarChart);
         default:
             console.error("No valid chart type specified..");
             return null;
@@ -68,7 +72,7 @@ ChartManager.prototype.AttachHeatmap = function(elemID, data){
             height = chartHeight - margin.top - margin.bottom;
 
     var svg  = d3.select(elemID).append("svg").attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("height", height + margin.top + margin.bottom).classed("heatmapSvg", true)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     var myGroups = d3.map(data[0].values, function(d){return d.time;}).keys()
@@ -134,7 +138,7 @@ ChartManager.prototype.AttachConnectedScatterPlot = function(elemID, data){
         height = chartHeight - margin.top - margin.bottom;
 
     var svg  = d3.select(elemID).append("svg").attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("height", height + margin.top + margin.bottom).classed("connectedScatterSvg", true)
     .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     var allGroups = data.map(d => d.route);
@@ -188,7 +192,7 @@ ChartManager.prototype.AttachRadar = function(elemID, data){
         width = chartWidth - margin.left - margin.right,
         height = chartHeight - margin.top - margin.bottom;
     var svg  = d3.select(elemID).append("svg").attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("height", height + margin.top + margin.bottom).classed("radarSvg", true)
     .append("g")
         .attr("transform", "translate(" + 0+ "," + 0 + ")");
 

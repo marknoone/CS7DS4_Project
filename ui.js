@@ -9,6 +9,7 @@ const infoLayout = document.querySelector('#info-layout');
 const clock = document.querySelector('#clock');
 const simClock = document.querySelector('#simClock');
 const simSpeed = document.querySelector('#simSpeed');
+const activeStopLabel = document.querySelector('#activeStopLabel');
 const popup = document.getElementsByClassName('popup-layout')[0];
 
 // Vehicle Metrics
@@ -29,14 +30,14 @@ const gadToggle  = document.querySelector('#gad-toggle');
 const luasToggle = document.querySelector('#luas-toggle');
 
 // daySelect Buttons
-const dayCharts         = document.querySelector('#chart-container');
-const mondaySelect      = document.querySelector('#monday');
-const tuesdaySelect     = document.querySelector('#tuesday');
-const wednesdaySelect   = document.querySelector('#wednesday');
-const thursdaySelect    = document.querySelector('#thursday');
-const fridaySelect      = document.querySelector('#friday');
-const saturdaySelect    = document.querySelector('#saturday');
-const sundaySelect      = document.querySelector('#sunday');
+// const dayCharts         = document.querySelector('#chart-container');
+// const mondaySelect      = document.querySelector('#monday');
+// const tuesdaySelect     = document.querySelector('#tuesday');
+// const wednesdaySelect   = document.querySelector('#wednesday');
+// const thursdaySelect    = document.querySelector('#thursday');
+// const fridaySelect      = document.querySelector('#friday');
+// const saturdaySelect    = document.querySelector('#saturday');
+// const sundaySelect      = document.querySelector('#sunday');
 
 var UIManager = function(gs){
     this.gs = gs;
@@ -49,13 +50,13 @@ var UIManager = function(gs){
 
     thisUI = this;
     // Change to update charts existing already in ChartManager.
-    mondaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "0vw";   });
-    tuesdaySelect.addEventListener('click',   function(e) { dayCharts.style.right = "100vw"; });
-    wednesdaySelect.addEventListener('click', function(e) { dayCharts.style.right = "200vw"; });
-    thursdaySelect.addEventListener('click',  function(e) { dayCharts.style.right = "300vw"; });
-    fridaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "400vw"; });
-    saturdaySelect.addEventListener('click',  function(e) { dayCharts.style.right = "500vw"; });
-    sundaySelect.addEventListener('click',    function(e) { dayCharts.style.right = "600vw"; });
+    // sundaySelect.addEventListener('click',    function(e) { thisUI.ChangeActiveCharts(0) });
+    // mondaySelect.addEventListener('click',    function(e) { thisUI.ChangeActiveCharts(1) });
+    // tuesdaySelect.addEventListener('click',   function(e) { thisUI.ChangeActiveCharts(2) });
+    // wednesdaySelect.addEventListener('click', function(e) { thisUI.ChangeActiveCharts(3) });
+    // thursdaySelect.addEventListener('click',  function(e) { thisUI.ChangeActiveCharts(4) });
+    // fridaySelect.addEventListener('click',    function(e) { thisUI.ChangeActiveCharts(5) });
+    // saturdaySelect.addEventListener('click',  function(e) { thisUI.ChangeActiveCharts(6) });
 
     shBtn.addEventListener('click', function(e) {
         thisUI.state.isPopupShowing = !thisUI.state.isPopupShowing;
@@ -94,6 +95,7 @@ var UIManager = function(gs){
     this.UpdateSimSpeed();
     this.UpdatePlayPauseBtn();
     this.UpdateFilters();
+    this.UpdateActiveStopLabel();
 };
 
 UIManager.prototype.toggleActiveBtn = function(el){
@@ -193,4 +195,11 @@ UIManager.prototype.UpdateVehicleMetricsObj = function(obj){
     // busMetric.innerHTML = busCount;
     // trainMetric.innerHTML = trainCount;
     tramMetric.innerHTML = tramCount;
+}
+
+UIManager.prototype.ChangeActiveCharts = function(dayInt) {this.gs.SetActiveChartDay(dayInt)}
+UIManager.prototype.UpdateActiveStopLabel = function (){
+    var activeStopID = this.gs.GetActiveStopID();
+    var stop = this.gs.GetDataManager().GetStop(activeStopID);
+    activeStopLabel.innerHTML = stop.Name+" ("+util.GetOrigID(activeStopID)+")"
 }
