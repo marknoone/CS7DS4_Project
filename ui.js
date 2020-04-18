@@ -12,6 +12,7 @@ const simClock = document.querySelector('#simClock');
 const simSpeed = document.querySelector('#simSpeed');
 const activeStopLabel = document.querySelector('#activeStopLabel');
 const popup = document.getElementsByClassName('popup-layout')[0];
+var slider = document.getElementById("timeSlider");
 
 // Vehicle Metrics
 const busMetric   = document.querySelector('#busMetric');
@@ -29,7 +30,7 @@ const dubToggle  = document.querySelector('#dub-toggle');
 const irToggle   = document.querySelector('#ir-toggle');
 const gadToggle  = document.querySelector('#gad-toggle');
 const luasToggle = document.querySelector('#luas-toggle');
-
+ 
 // daySelect Buttons
 // const dayCharts         = document.querySelector('#chart-container');
 // const mondaySelect      = document.querySelector('#monday');
@@ -46,7 +47,8 @@ var UIManager = function(gs){
     this.state = {
         isInfoShowing: false,
         isFilterShowing: false,
-        isPopupShowing: true
+        isPopupShowing: true,
+        isSliderActive: false
     }
 
     thisUI = this;
@@ -63,6 +65,9 @@ var UIManager = function(gs){
         thisUI.state.isPopupShowing = !thisUI.state.isPopupShowing;
         thisUI.updateUI();  // TODO: Remove and place with render call
     });
+
+    slider.addEventListener('mousedown', function(e){ thisUI.gs.SetSlider(true); });
+    slider.addEventListener('mouseup',   function(e){ thisUI.gs.SetSlider(false); });
     
     // filterBtn.addEventListener('click', function(e) {
     //     thisUI.state.isFilterShowing = !thisUI.state.isFilterShowing;
@@ -206,3 +211,7 @@ UIManager.prototype.UpdateActiveStopLabel = function (){
     var stop = this.gs.GetDataManager().GetStop(activeStopID);
     activeStopLabel.innerHTML = stop.Name+" ("+util.GetOrigID(activeStopID)+")"
 }
+
+UIManager.prototype.GetSliderActive = function(){ return slider.value; }
+UIManager.prototype.GetSliderTime = function(){ return slider.value; }
+UIManager.prototype.SetSliderTime = function(val){ slider.value = val; }

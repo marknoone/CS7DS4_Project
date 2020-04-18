@@ -23,6 +23,8 @@ var GlobalState = function(){
     this.isPaused = true;
     this.time = new Date().getTime(),
     this.activeChartDay = 1;
+    this.activeSlider = false;
+    this.sliderTime = 0;
     
     // TODO: variable sim time
     this.simTime = new Date(2020, 03, 21, 16, 30, 00, 00),
@@ -47,7 +49,11 @@ GlobalState.prototype.ClearTimeout = function(){
 
 GlobalState.prototype.Update = function(){
     this.ui.UpdateClock(); // Keep clock up do date.
-    
+    if (this.activeSlider) {
+        this.simTimeout = setTimeout((function(){ this.Update(); }).bind(this), 34);
+        return
+    }
+
     var thisState = this, last = this.time, 
         curr = new Date().getTime(), speedMS = 1000/SIM_SPEED[this.speedIdx];
     if(curr - last < Math.abs(speedMS) || this.isPaused){
@@ -55,6 +61,8 @@ GlobalState.prototype.Update = function(){
         return;
     }
     
+    this.sliderTime = this.ui.SetSliderTime(
+        (this.simTime.getHours() * 60*60) + (this.simTime.getMinutes() *60) + this.simTime.getSeconds());
     this.time = curr;
     this.simTime.setTime(this.simTime.getTime() + (1000 * Math.sign(SIM_SPEED[this.speedIdx]) ));
     this.ui.UpdateSimClock(); // Keep clock up do date.
@@ -67,6 +75,8 @@ GlobalState.prototype.GetUI = function(){ return this.ui; };
 GlobalState.prototype.SetUI = function(ui){ 
     if (ui !== null) {
         this.ui = ui;
+        this.ui.SetSliderTime(
+            (this.simTime.getHours() * 60*60) + (this.simTime.getMinutes() *60) + this.simTime.getSeconds());
     }
 };
 
@@ -170,3 +180,17 @@ GlobalState.prototype.SetFilter = function(value, filter){
     
     this.networkGraph.UpdateFilters();
 };
+
+GlobalState.prototype.SetSlider = function(val) { 
+    this.activeSlider = val; 
+    if (val === false) {
+        var tmp = this.ui.GetSliderTime();
+        this.simTime = new Date(2020, 03, 21, 
+            Math.floor(tmp/60/60), 
+            Math.floor(tmp/60)%60, 
+            tmp%60, 
+            00
+        );
+        this.ui.UpdateSimClock();
+    }
+}
