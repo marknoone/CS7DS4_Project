@@ -32,10 +32,73 @@ label {
 /* Shortcuts */
 .ta-left {text-align: left;}
 .ta-center {text-align: center;}
+.in-block {display: inline-block;}
 
+/* Glyphs */
+.glyph-legend {
+    position: absolute;
+    top: 81vh;
+    right: 30px;
+    background-color: #fff;
+    border-radius: 6px;
+    width: 200px;
+    height: 180px;
+    box-shadow: 0px 2px 10px 2px #aaa;
+    transition: top linear .2s;
+}
+
+.glyph-legend ul {
+    margin-top: 2px;
+    padding: 0px 10px 0px 24px;
+}
+
+.glyph-legend p {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.glyph-container  {
+    width: 45px;
+}
+
+.luas-glyph {
+    border-radius: 50%;
+    background: #EE5253;
+    height: 16px;
+    width: 16px;
+}
+
+.luas-stop-glyph {
+    position: relative;
+    border-radius: 50%;
+    background: #463462;
+    height: 16px;
+    width: 16px;
+    text-align: center;
+    z-index: 150;
+}
+
+.inner-luas-stop {
+    position: relative;
+    top: 2.5px;
+    left: 2.5px;
+    border-radius: 50%;
+    background: #fff;
+    height: 11px;
+    width: 11px;
+    text-align: center;
+    z-index: 200;
+}
+
+.luas-line-glyph {
+    height: 2px;
+    border: 2px solid #333333;
+    border-radius: 6px;
+    width: 30px;
+}
 
 /* General */
-
 .ui-controls {
     position: absolute;
     right: 30px;
@@ -51,8 +114,8 @@ label {
 }
 
 .filter { top: 6vh; padding-top: 6px; }
-.info { top: 90vh; padding-top: 6px;  transition: top linear .2s; }
-.zoom { top: 82vh; height: 80px; transition: top linear .2s; }
+.info { top: 77vh; padding-top: 6px;  transition: top linear .2s; }
+.zoom { top: 69vh; height: 80px; transition: top linear .2s; }
 #zoom-plus { border-radius: 6px 6px 0px 0px }
 #zoom-minus { border-radius: 0px 0px 6px 6px }
 .zoom ul { padding: 0; }
@@ -96,7 +159,7 @@ label {
 #info-layout {
     position: absolute;
     right: 80px;
-    top: 90vh;
+    top: 77vh;
     background: white;
     border-radius: 6px;
     height: 40px;

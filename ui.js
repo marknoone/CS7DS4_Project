@@ -6,6 +6,7 @@ const zoomMinusBtn = document.querySelector('#zoom-minus-btn');
 const zoomLayout = document.querySelector('#zoom-layout');
 const infoBtn = document.querySelector('#info-btn');
 const infoLayout = document.querySelector('#info-layout');
+const glyphLegend = document.querySelector('#glyphLegend');
 const clock = document.querySelector('#clock');
 const simClock = document.querySelector('#simClock');
 const simSpeed = document.querySelector('#simSpeed');
@@ -119,15 +120,17 @@ UIManager.prototype.updateUI = function() {
     // Change button icon
     if (this.state.isPopupShowing) {
         shBtn.childNodes[0].className = "fas fa-angle-down";
-        infoLayout.style.top = "58vh";
-        infoBtn.style.top = "58vh";
-        zoomLayout.style.top = "50vh";
+        infoLayout.style.top = "45vh";
+        infoBtn.style.top = "45vh";
+        zoomLayout.style.top = "37vh";
+        glyphLegend.style.top = "49vh";
     }
     else {
         shBtn.childNodes[0].className = "fas fa-angle-up";
-        infoLayout.style.top = "90vh";
-        infoBtn.style.top = "90vh";
-        zoomLayout.style.top = "82vh";
+        infoLayout.style.top = "77vh";
+        infoBtn.style.top = "77vh";
+        zoomLayout.style.top = "69vh";
+        glyphLegend.style.top= "81vh";
     }
     
     // Set popup position

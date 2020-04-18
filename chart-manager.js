@@ -8,6 +8,7 @@
     - Connected Scatter Plot Source:    https://www.d3-graph-gallery.com/connectedscatter.html
     - Radar Chart Source:               http://bl.ocks.org/nbremer/21746a9668ffdf6d8242
     - Stacked Bar Chart Source:         https://www.d3-graph-gallery.com/graph/barplot_stacked_highlight.html
+    - Gradient Line Chart:              https://www.d3-graph-gallery.com/graph/line_color_gradient_svg.html
 */
 
 const chartHeight = 240;
@@ -17,7 +18,8 @@ const CHART_TYPES = Object.freeze({
     HEATMAP:                    "8702ae7c-f3ea-4349-bfde-f4774d2b3eeb",
     CONNECTED_SCATTER_PLOT:     "af6372e8-f052-45d6-9119-e467ccd1c395",
     RADAR:                      "df829c11-9779-42af-9a3f-76f19ebf017a",
-    STACKED_BAR_CHART:          "d1d6b1d4-4a69-4a7d-bc7a-5713b6886a22"
+    STACKED_BAR_CHART:          "d1d6b1d4-4a69-4a7d-bc7a-5713b6886a22",
+    LINE_CHART_GRADIENT:        "fd4e26c9-4030-492d-b943-20643594dd52"
 });
 
 var ChartManager = function (globalState) {
@@ -30,7 +32,7 @@ var ChartManager = function (globalState) {
     this.radarChart             = null;
     this.stackedBarChart        = null;
 
-    this.AddChartToElem(CHART_TYPES.HEATMAP);
+    this.AddChartToElem(CHART_TYPES.LINE_CHART_GRADIENT);
     this.AddChartToElem(CHART_TYPES.CONNECTED_SCATTER_PLOT);
     this.AddChartToElem(CHART_TYPES.RADAR);
 }
@@ -40,7 +42,7 @@ ChartManager.prototype.UpdateCharts = function(){
     d3.select(".heatmapSvg").remove();
     d3.select(".connectedScatterSvg").remove();
     d3.select(".radarSvg").remove();
-    this.AddChartToElem(CHART_TYPES.HEATMAP);
+    this.AddChartToElem(CHART_TYPES.LINE_CHART_GRADIENT);
     this.AddChartToElem(CHART_TYPES.CONNECTED_SCATTER_PLOT);
     this.AddChartToElem(CHART_TYPES.RADAR);
 }
@@ -48,8 +50,8 @@ ChartManager.prototype.UpdateCharts = function(){
 ChartManager.prototype.AddChartToElem = function(type){
     var data = this.dm.GetStopChart(this.gs.GetActiveStopID());
     switch(type){
-        case CHART_TYPES.HEATMAP:
-            return this.AttachHeatmap( "#heatChart", data.Heatmap);
+        case CHART_TYPES.LINE_CHART_GRADIENT:
+            return this.AttachLineChart( "#heatChart", data.Heatmap);
         case CHART_TYPES.CONNECTED_SCATTER_PLOT:
             return this.AttachConnectedScatterPlot("#vehicleActivity", data.ConnectedScatterPlot);
         case CHART_TYPES.RADAR:
@@ -130,6 +132,65 @@ ChartManager.prototype.AttachHeatmap = function(elemID, data){
             d3.select(this).style("stroke", "none").style("opacity", 0.8)});
 
     this.heatmap = svg;
+}
+
+ChartManager.prototype.AttachLineChart = function(elemID, data){
+    var reducedData = [];
+    const margin = {top: 0, right: 10,  bottom:20,  left: 80},
+            width = chartWidth - margin.left - margin.right,
+            height = chartHeight - margin.top - margin.bottom;
+
+    var svg  = d3.select(elemID).append("svg").attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom).classed("heatmapSvg", true)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    data.forEach(function(d){ d.values.forEach(function(v){
+            reducedData.push({ route: d.route, time: v.time, value: v.value });
+    })});
+    var max = d3.max(reducedData,  d=> d.value);
+    
+    var x = d3.scaleLinear()
+      .domain([0, 24])
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([0, max])
+      .range([ height, 0 ]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    // Set the gradient
+    svg.append("linearGradient")
+      .attr("id", "line-gradient")
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", 0)
+      .attr("y1", y(0))
+      .attr("x2", 0)
+      .attr("y2", y(max))
+      .selectAll("stop")
+        .data([
+          {offset: "0%", color: "blue"},
+          {offset: "100%", color: "red"}
+        ])
+      .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+
+    // Add the line
+    svg.append("path")
+      .datum(reducedData)
+      .attr("fill", "none")
+      .attr("stroke", "url(#line-gradient)" )
+      .attr("stroke-width", 2)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.time) })
+        .y(function(d) { return y(d.value) })
+    )
 }
 
 ChartManager.prototype.AttachConnectedScatterPlot = function(elemID, data){
